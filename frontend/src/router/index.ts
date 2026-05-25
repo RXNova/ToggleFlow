@@ -11,15 +11,20 @@ const router = createRouter({
     { path: '/login', name: 'login', component: () => import('@/views/LoginView.vue') },
     {
       path: '/',
-      name: 'home',
-      component: () => import('@/views/HomeView.vue'),
+      component: () => import('@/layouts/AppLayout.vue'),
       meta: { requiresAuth: true },
+      children: [
+        { path: '', redirect: { name: 'flags' } },
+        { path: 'flags',        name: 'flags',        component: () => import('@/views/FlagsView.vue') },
+        { path: 'environments', name: 'environments', component: () => import('@/views/EnvironmentsView.vue') },
+        { path: 'audit',        name: 'audit',        component: () => import('@/views/AuditView.vue') },
+        { path: 'users',        name: 'users',        component: () => import('@/views/UsersView.vue'), meta: { requiresAdmin: true } },
+      ],
     },
   ],
 })
 
 router.beforeEach(async (to) => {
-  // One-time check: does the backend have any users yet?
   if (initialized === null) {
     try {
       const status = await authApi.status()
@@ -29,15 +34,11 @@ router.beforeEach(async (to) => {
     }
   }
 
-  // No superuser yet → force setup
   if (!initialized && to.name !== 'setup') return { name: 'setup' }
-
-  // Already initialized → setup is locked
   if (initialized && to.name === 'setup') return { name: 'login' }
 
   const auth = useAuthStore()
 
-  // Route requires auth — verify or restore session
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     if (auth.token) {
       try {
@@ -52,8 +53,9 @@ router.beforeEach(async (to) => {
     }
   }
 
-  // Already logged in → bypass login page
-  if (to.name === 'login' && auth.isAuthenticated) return { name: 'home' }
+  if (to.meta.requiresAdmin && !auth.isAdmin) return { name: 'flags' }
+
+  if (to.name === 'login' && auth.isAuthenticated) return { name: 'flags' }
 })
 
 export default router

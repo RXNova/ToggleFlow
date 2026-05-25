@@ -31,6 +31,47 @@
     "submit": "Sign in",
     "submitting": "Signing in..."
   },
+  "nav": {
+    "flags": "Feature Flags",
+    "environments": "Environments",
+    "audit": "Audit Log",
+    "users": "Users",
+    "signOut": "Sign out"
+  },
+  "roles": {
+    "superuser": "Superuser",
+    "admin": "Admin",
+    "owner": "Owner",
+    "editor": "Editor",
+    "viewer": "Viewer"
+  },
+  "flags": {
+    "title": "Feature Flags",
+    "subtitle": "Manage flags across all environments",
+    "create": "Create flag",
+    "emptyTitle": "No feature flags yet",
+    "emptyDescription": "Create your first flag to start rolling out features gradually."
+  },
+  "environments": {
+    "title": "Environments",
+    "subtitle": "Isolate flag states across dev, staging, and production",
+    "create": "Create environment",
+    "emptyTitle": "No environments yet",
+    "emptyDescription": "Environments let you control flag states independently across dev, staging, and prod."
+  },
+  "audit": {
+    "title": "Audit Log",
+    "subtitle": "Track every change to flags and settings",
+    "emptyTitle": "No activity yet",
+    "emptyDescription": "Every flag change will be recorded here with actor, timestamp, and before/after values."
+  },
+  "users": {
+    "title": "Users",
+    "subtitle": "Manage team member access and permissions",
+    "invite": "Invite user",
+    "emptyTitle": "No other users yet",
+    "emptyDescription": "Invite team members and assign roles to control their access."
+  },
   "lang": {
     "label": "Language",
     "en": "English",

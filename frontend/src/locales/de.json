@@ -31,6 +31,47 @@
     "submit": "Anmelden",
     "submitting": "Anmeldung läuft..."
   },
+  "nav": {
+    "flags": "Feature-Flags",
+    "environments": "Umgebungen",
+    "audit": "Audit-Protokoll",
+    "users": "Benutzer",
+    "signOut": "Abmelden"
+  },
+  "roles": {
+    "superuser": "Superuser",
+    "admin": "Administrator",
+    "owner": "Eigentümer",
+    "editor": "Bearbeiter",
+    "viewer": "Betrachter"
+  },
+  "flags": {
+    "title": "Feature-Flags",
+    "subtitle": "Feature-Flags in allen Umgebungen verwalten",
+    "create": "Flag erstellen",
+    "emptyTitle": "Noch keine Feature-Flags",
+    "emptyDescription": "Erstellen Sie Ihren ersten Flag, um Funktionen schrittweise bereitzustellen."
+  },
+  "environments": {
+    "title": "Umgebungen",
+    "subtitle": "Flag-Zustände in dev, staging und prod isolieren",
+    "create": "Umgebung erstellen",
+    "emptyTitle": "Noch keine Umgebungen",
+    "emptyDescription": "Umgebungen ermöglichen die unabhängige Steuerung von Flag-Zuständen über dev, staging und prod."
+  },
+  "audit": {
+    "title": "Audit-Protokoll",
+    "subtitle": "Jede Änderung an Flags und Einstellungen nachverfolgen",
+    "emptyTitle": "Noch keine Aktivitäten",
+    "emptyDescription": "Jede Flag-Änderung wird hier mit Akteur, Zeitstempel und Vorher-/Nachher-Werten erfasst."
+  },
+  "users": {
+    "title": "Benutzer",
+    "subtitle": "Zugriff und Berechtigungen der Teammitglieder verwalten",
+    "invite": "Benutzer einladen",
+    "emptyTitle": "Noch keine weiteren Benutzer",
+    "emptyDescription": "Laden Sie Teammitglieder ein und weisen Sie Rollen zu, um den Zugriff zu steuern."
+  },
   "lang": {
     "label": "Sprache",
     "en": "Englisch",
