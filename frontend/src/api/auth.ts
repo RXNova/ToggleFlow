@@ -14,9 +14,9 @@ interface AuthResponse {
 }
 
 export const authApi = {
-  status: () => api.get<{ initialized: boolean }>('/auth/status'),
+  status: () => api.get<{ initialized: boolean }>('/setup/status'),
   setup: (name: string, email: string, password: string, locale: string) =>
-    api.post<AuthResponse>('/auth/setup', { name, email, password, locale }),
+    api.post<AuthResponse>('/setup', { name, email, password, locale }),
   login: (email: string, password: string) =>
     api.post<AuthResponse>('/auth/login', { email, password }),
   me: () => api.get<User>('/auth/me'),
