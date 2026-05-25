@@ -52,6 +52,50 @@ type FlagEnvironment struct {
 	DefaultVariation int    `bun:"default_variation,notnull,default:0"`
 }
 
+// Role defines what a user can do in the system.
+// Ordered from highest to lowest privilege.
+type Role string
+
+const (
+	RoleSuperuser Role = "superuser"
+	RoleAdmin     Role = "admin"
+	RoleOwner     Role = "owner"
+	RoleEditor    Role = "editor"
+	RoleViewer    Role = "viewer"
+)
+
+// RoleRank returns a numeric rank so we can compare roles.
+// Higher number = more privilege.
+func RoleRank(r Role) int {
+	switch r {
+	case RoleSuperuser:
+		return 5
+	case RoleAdmin:
+		return 4
+	case RoleOwner:
+		return 3
+	case RoleEditor:
+		return 2
+	case RoleViewer:
+		return 1
+	default:
+		return 0
+	}
+}
+
+type User struct {
+	bun.BaseModel `bun:"table:users"`
+	ID           int64     `bun:"id,pk,autoincrement" json:"id"`
+	Name         string    `bun:"name,notnull" json:"name"`
+	Email        string    `bun:"email,notnull,unique" json:"email"`
+	PasswordHash string    `bun:"password_hash,notnull" json:"-"`
+	Role         Role      `bun:"role,notnull" json:"role"`
+	Locale       string    `bun:"locale,notnull,default:'en'" json:"locale"`
+	CreatedBy    *int64    `bun:"created_by" json:"created_by,omitempty"`
+	CreatedAt    time.Time `bun:"created_at,notnull,default:current_timestamp" json:"created_at"`
+	UpdatedAt    time.Time `bun:"updated_at,notnull,default:current_timestamp" json:"updated_at"`
+}
+
 type AuditEntry struct {
 	bun.BaseModel `bun:"table:audit_entries"`
 	ID        int64     `bun:"id,pk,autoincrement"`

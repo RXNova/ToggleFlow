@@ -285,6 +285,11 @@ docker run -p 8080:8080 -v ./data:/data -e ADMIN_TOKEN=secret toggleflow
 - No comments explaining what the code does — only write a comment when the why is non-obvious
 - Ask before adding a new dependency
 
+### Git Identity
+- Author name: `RXNova`
+- Author email: `q4pradeep@gmail.com`
+- Always run `git config user.name "RXNova" && git config user.email "q4pradeep@gmail.com"` before committing if not already set
+
 ### Git Commits
 - Write commit messages in plain human style — short, lowercase, no ticket refs, no AI phrasing
 - Examples: `add flag toggle endpoint`, `fix env slug uniqueness`, `wire up sse broker`

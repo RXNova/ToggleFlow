@@ -1,38 +1,52 @@
 package api
 
 import (
+	"github.com/RXNova/ToggleFlow/internal/auth"
+	"github.com/RXNova/ToggleFlow/internal/db"
 	"github.com/gofiber/fiber/v2"
 	"github.com/uptrace/bun"
 )
 
-// Register wires all routes onto the Fiber app.
-// Think of this as the root AppModule in NestJS — it pulls in all sub-modules.
-func Register(app *fiber.App, db *bun.DB) {
-	h := newHandler(db)
+func Register(app *fiber.App, database *bun.DB) {
+	h := newHandler(database)
 
-	// Health check
-	app.Get("/api/health", h.Health)
+	// Public — no auth required
+	app.Get("/api/setup/status", h.SetupStatus)
+	app.Post("/api/setup", h.Setup)
+	app.Post("/api/auth/login", h.Login)
 
-	// Projects — like a NestJS controller at /projects
-	projects := app.Group("/api/projects")
+	// Authenticated — all roles
+	protected := app.Group("/api", auth.Require)
+	protected.Get("/auth/me", h.Me)
+	protected.Patch("/auth/profile", h.UpdateProfile)
+
+	// User management — Admin and above
+	users := protected.Group("/users", auth.RequireRole(db.RoleAdmin))
+	users.Get("/", h.ListUsers)
+	users.Post("/", h.CreateUser)
+	users.Patch("/:id", h.UpdateUser)
+
+	// Delete user — Superuser only
+	protected.Delete("/users/:id", auth.RequireRole(db.RoleSuperuser), h.DeleteUser)
+
+	// Projects — Owner and above
+	projects := protected.Group("/projects", auth.RequireRole(db.RoleOwner))
 	projects.Post("/", h.CreateProject)
 	projects.Get("/", h.ListProjects)
-
-	// Environments — nested under a project
 	projects.Post("/:pid/environments", h.CreateEnvironment)
 	projects.Get("/:pid/environments", h.ListEnvironments)
 
-	// Flags
-	projects.Post("/:pid/flags", h.CreateFlag)
-	projects.Get("/:pid/flags", h.ListFlags)
-	projects.Get("/:pid/flags/:key", h.GetFlag)
-	projects.Patch("/:pid/flags/:key", h.UpdateFlag)
-	projects.Delete("/:pid/flags/:key", h.DeleteFlag)
+	// Flags — Editor and above to write, Viewer to read
+	protected.Get("/projects/:pid/flags", h.ListFlags)
+	protected.Get("/projects/:pid/flags/:key", h.GetFlag)
+	protected.Get("/projects/:pid/audit", h.ListAudit)
 
-	// Audit log
-	projects.Get("/:pid/audit", h.ListAudit)
+	flagsWrite := protected.Group("/projects/:pid/flags", auth.RequireRole(db.RoleEditor))
+	flagsWrite.Post("/", h.CreateFlag)
+	flagsWrite.Patch("/:key", h.UpdateFlag)
+	flagsWrite.Delete("/:key", h.DeleteFlag)
 
-	// SDK endpoints — authenticated by ?sdk_key= query param
+	// SDK — authenticated by sdk_key query param, not JWT
 	sdk := app.Group("/sdk")
 	sdk.Get("/flags", h.SDKGetFlags)
 	sdk.Post("/evaluate", h.SDKEvaluate)

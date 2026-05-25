@@ -12,6 +12,7 @@ func Migrate(db *bun.DB) error {
 	ctx := context.Background()
 
 	models := []interface{}{
+		(*User)(nil),
 		(*Project)(nil),
 		(*Environment)(nil),
 		(*Flag)(nil),
