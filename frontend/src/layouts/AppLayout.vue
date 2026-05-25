@@ -1,95 +1,71 @@
 <template>
   <div class="flex h-screen overflow-hidden bg-background">
 
-    <!-- Sidebar -->
-    <aside class="flex w-56 flex-none flex-col border-r bg-sidebar">
-
-      <!-- Logo -->
-      <div class="flex h-12 items-center gap-2 border-b px-4">
-        <ToggleRight class="size-4 text-sidebar-foreground" />
-        <span class="text-sm font-semibold tracking-tight text-sidebar-foreground">ToggleFlow</span>
-      </div>
-
-      <!-- Nav -->
-      <nav class="flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
-        <button
-          v-for="item in navItems"
-          :key="item.to"
-          class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
-          :class="isActive(item.to)
-            ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'"
-          @click="router.push(item.to)"
-        >
-          <component :is="item.icon" class="size-4 shrink-0" />
-          {{ item.label }}
-        </button>
-      </nav>
-
-      <!-- User footer -->
-      <div class="border-t p-2 space-y-0.5">
-        <button
-          class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors"
-          :class="isActive('/settings')
-            ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'"
-          @click="router.push('/settings')"
-        >
-          <div class="flex-1 min-w-0">
-            <p class="text-xs font-medium truncate">{{ authStore.user?.name }}</p>
-            <p class="text-xs opacity-50">{{ $t(`roles.${authStore.user?.role}`) }}</p>
-          </div>
-          <Settings class="size-3.5 shrink-0 opacity-50" />
-        </button>
-        <button
-          class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          @click="signOut"
-        >
-          <LogOut class="size-4 shrink-0" />
-          {{ $t('nav.signOut') }}
-        </button>
-      </div>
-
+    <!-- Desktop sidebar: always visible on lg+ -->
+    <aside class="hidden lg:flex w-56 flex-none flex-col border-r bg-sidebar">
+      <SidebarNav />
     </aside>
 
-    <!-- Main content -->
-    <main class="flex-1 overflow-y-auto">
-      <RouterView />
-    </main>
+    <!-- Right side: mobile top bar + scrollable content -->
+    <div class="flex flex-1 flex-col overflow-hidden">
+
+      <!-- Mobile top bar -->
+      <div class="flex h-12 shrink-0 items-center gap-3 border-b bg-background px-4 lg:hidden">
+        <button
+          class="rounded-md p-1 text-foreground transition-colors hover:bg-accent"
+          @click="drawerOpen = true"
+        >
+          <Menu class="size-5" />
+        </button>
+        <div class="flex items-center gap-2">
+          <ToggleRight class="size-4" />
+          <span class="text-sm font-semibold tracking-tight">ToggleFlow</span>
+        </div>
+      </div>
+
+      <!-- Page content -->
+      <main class="flex-1 overflow-y-auto">
+        <RouterView />
+      </main>
+
+    </div>
+
+    <!-- Mobile drawer backdrop -->
+    <Transition
+      enter-from-class="opacity-0"
+      enter-active-class="transition-opacity duration-200"
+      leave-active-class="transition-opacity duration-200"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="drawerOpen"
+        class="fixed inset-0 z-40 bg-black/40 lg:hidden"
+        @click="drawerOpen = false"
+      />
+    </Transition>
+
+    <!-- Mobile drawer panel -->
+    <Transition
+      enter-from-class="-translate-x-full"
+      enter-active-class="transition-transform duration-200 ease-out"
+      leave-active-class="transition-transform duration-200 ease-in"
+      leave-to-class="-translate-x-full"
+    >
+      <aside
+        v-if="drawerOpen"
+        class="fixed left-0 top-0 z-50 flex h-full w-64 flex-col bg-sidebar shadow-xl lg:hidden"
+      >
+        <SidebarNav @navigate="drawerOpen = false" />
+      </aside>
+    </Transition>
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import { ToggleRight, Flag, Globe, ClipboardList, Users, LogOut, Settings } from '@lucide/vue'
-import { useAuthStore } from '@/stores/auth'
+import { ref } from 'vue'
+import { Menu, ToggleRight } from '@lucide/vue'
+import SidebarNav from './SidebarNav.vue'
 
-const { t } = useI18n()
-const router = useRouter()
-const route = useRoute()
-const authStore = useAuthStore()
-
-const navItems = computed(() => {
-  const items = [
-    { to: '/flags',        icon: Flag,          label: t('nav.flags') },
-    { to: '/environments', icon: Globe,          label: t('nav.environments') },
-    { to: '/audit',        icon: ClipboardList,  label: t('nav.audit') },
-  ]
-  if (authStore.isAdmin) {
-    items.push({ to: '/users', icon: Users, label: t('nav.users') })
-  }
-  return items
-})
-
-function isActive(path: string) {
-  return route.path.startsWith(path)
-}
-
-function signOut() {
-  authStore.logout()
-  router.push('/login')
-}
+const drawerOpen = ref(false)
 </script>
