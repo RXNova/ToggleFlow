@@ -68,8 +68,15 @@
     "title": "Umgebungen",
     "subtitle": "Flag-Zustände in dev, staging und prod isolieren",
     "create": "Umgebung erstellen",
+    "creating": "Wird erstellt...",
+    "createTitle": "Umgebung erstellen",
+    "createDescription": "Umgebungen ermöglichen die unabhängige Steuerung von Flag-Zuständen über dev, staging und prod.",
+    "name": "Name",
+    "namePlaceholder": "Produktion",
     "emptyTitle": "Noch keine Umgebungen",
-    "emptyDescription": "Umgebungen ermöglichen die unabhängige Steuerung von Flag-Zuständen über dev, staging und prod."
+    "emptyDescription": "Umgebungen ermöglichen die unabhängige Steuerung von Flag-Zuständen über dev, staging und prod.",
+    "sdkKey": "SDK-Schlüssel",
+    "copied": "Kopiert!"
   },
   "audit": {
     "title": "Audit-Protokoll",

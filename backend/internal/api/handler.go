@@ -18,10 +18,6 @@ func (h *handler) Health(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"status": "ok"})
 }
 
-// --- Environments ---
-func (h *handler) CreateEnvironment(c *fiber.Ctx) error { return stub(c) }
-func (h *handler) ListEnvironments(c *fiber.Ctx) error  { return stub(c) }
-
 // --- Flags ---
 func (h *handler) CreateFlag(c *fiber.Ctx) error { return stub(c) }
 func (h *handler) ListFlags(c *fiber.Ctx) error  { return stub(c) }
