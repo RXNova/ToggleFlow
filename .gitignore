@@ -1,0 +1,18 @@
+# Claude
+CLAUDE.md
+
+# Go
+backend/tmp/
+backend/flags.db
+*.db
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Docker
+data/
+
+# OS
+.DS_Store
+*.env.local
