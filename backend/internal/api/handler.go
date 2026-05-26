@@ -8,6 +8,7 @@ import (
 
 	"toggleflow/internal/auth"
 	"toggleflow/internal/db"
+	"toggleflow/internal/stream"
 )
 
 // Page is the standard paginated response shape for all list endpoints.
@@ -43,11 +44,12 @@ func parsePage(c *fiber.Ctx) pageQuery {
 
 // handler holds shared dependencies — like a NestJS service injected into a controller.
 type handler struct {
-	db *bun.DB
+	db     *bun.DB
+	broker *stream.Broker
 }
 
-func newHandler(db *bun.DB) *handler {
-	return &handler{db: db}
+func newHandler(db *bun.DB, broker *stream.Broker) *handler {
+	return &handler{db: db, broker: broker}
 }
 
 func (h *handler) Health(c *fiber.Ctx) error {
@@ -68,13 +70,4 @@ func (h *handler) checkProjectAccess(c *fiber.Ctx, pid int64) error {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "you are not a member of this project"})
 	}
 	return nil
-}
-
-// --- SDK ---
-func (h *handler) SDKGetFlags(c *fiber.Ctx) error { return stub(c) }
-func (h *handler) SDKEvaluate(c *fiber.Ctx) error { return stub(c) }
-func (h *handler) SDKStream(c *fiber.Ctx) error   { return stub(c) }
-
-func stub(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{"error": "not implemented"})
 }

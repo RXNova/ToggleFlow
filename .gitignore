@@ -21,3 +21,6 @@ data/
 # OS
 .DS_Store
 *.env.local
+
+# ignore seed data
+backend/seed.sql

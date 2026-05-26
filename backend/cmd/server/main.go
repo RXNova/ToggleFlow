@@ -6,6 +6,7 @@ import (
 
 	"toggleflow/internal/api"
 	"toggleflow/internal/db"
+	"toggleflow/internal/stream"
 	"toggleflow/internal/ui"
 
 	"github.com/gofiber/fiber/v2"
@@ -31,8 +32,10 @@ func main() {
 	app.Use(logger.New())
 	app.Use(cors.New())
 
+	broker := stream.New()
+
 	// API routes — like registering a NestJS module
-	api.Register(app, database)
+	api.Register(app, database, broker)
 
 	// Serve embedded Vue dashboard — must be registered last
 	ui.Register(app)

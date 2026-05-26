@@ -3,13 +3,14 @@ package api
 import (
 	"toggleflow/internal/auth"
 	"toggleflow/internal/db"
+	"toggleflow/internal/stream"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/uptrace/bun"
 )
 
-func Register(app *fiber.App, database *bun.DB) {
-	h := newHandler(database)
+func Register(app *fiber.App, database *bun.DB, broker *stream.Broker) {
+	h := newHandler(database, broker)
 
 	// Public — no auth required
 	app.Get("/api/setup/status", h.SetupStatus)

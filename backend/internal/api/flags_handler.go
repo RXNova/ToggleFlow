@@ -11,6 +11,7 @@ import (
 
 	"toggleflow/internal/auth"
 	"toggleflow/internal/db"
+	"toggleflow/internal/stream"
 )
 
 var validFlagTypes = map[string]bool{
@@ -301,6 +302,8 @@ func (h *handler) UpdateFlag(c *fiber.Ctx) error {
 		toJSON(map[string]any{"name": oldName, "description": oldDesc}),
 		toJSON(map[string]any{"name": flag.Name, "description": flag.Description}))
 
+	h.broker.Publish(stream.Event{ProjectID: pid, FlagKey: flag.Key, Action: "updated"})
+
 	return c.JSON(parseFlagResponse(flag, nil))
 }
 
@@ -357,6 +360,13 @@ func (h *handler) ToggleFlagEnv(c *fiber.Ctx) error {
 		toJSON(map[string]any{"env": env.Name, "enabled": oldEnabled}),
 		toJSON(map[string]any{"env": env.Name, "enabled": req.Enabled}))
 
+	h.broker.Publish(stream.Event{
+		ProjectID: pid,
+		EnvKey:    env.Key,
+		FlagKey:   flag.Key,
+		Action:    "updated",
+	})
+
 	return c.JSON(fiber.Map{"ok": true})
 }
 
@@ -399,6 +409,12 @@ func (h *handler) DeleteFlag(c *fiber.Ctx) error {
 
 	h.writeAudit(pid, h.actorName(c), "flag.deleted", flag.Key,
 		toJSON(map[string]any{"name": flag.Name, "key": flag.Key}), "")
+
+	h.broker.Publish(stream.Event{
+		ProjectID: pid,
+		FlagKey:   flag.Key,
+		Action:    "deleted",
+	})
 
 	return c.SendStatus(fiber.StatusNoContent)
 }
