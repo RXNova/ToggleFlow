@@ -20,14 +20,14 @@
         </div>
 
         <div class="space-y-2">
-          <Label for="project-slug">{{ $t('projects.slug') }}</Label>
+          <Label for="project-key">{{ $t('projects.key') }}</Label>
           <Input
-            id="project-slug"
-            v-model="slug"
+            id="project-key"
+            v-model="key"
             placeholder="my-project"
             class="mt-2 font-mono"
             required
-            @focus="slugTouched = true"
+            @focus="keyTouched = true"
           />
         </div>
 
@@ -74,16 +74,16 @@ const emit = defineEmits<{
 }>()
 
 const name = ref('')
-const slugRaw = ref('')
-const slugTouched = ref(false)
+const keyRaw = ref('')
+const keyTouched = ref(false)
 const loading = ref(false)
 const error = ref('')
 
 // Computed setter sanitizes every keystroke: lowercase, a-z 0-9 hyphens only
-const slug = computed({
-  get: () => slugRaw.value,
+const key = computed({
+  get: () => keyRaw.value,
   set: (v: string) => {
-    slugRaw.value = v.toLowerCase().replace(/[^a-z0-9-]/g, '')
+    keyRaw.value = v.toLowerCase().replace(/[^a-z0-9-]/g, '')
   },
 })
 
@@ -96,7 +96,7 @@ function slugify(s: string) {
 
 // Auto-populate slug from name until user touches the slug field
 watch(name, (v: string) => {
-  if (!slugTouched.value) slugRaw.value = slugify(v)
+  if (!keyTouched.value) keyRaw.value = slugify(v)
 })
 
 watch(
@@ -104,8 +104,8 @@ watch(
   (v: boolean) => {
     if (v) {
       name.value = ''
-      slugRaw.value = ''
-      slugTouched.value = false
+      keyRaw.value = ''
+      keyTouched.value = false
       error.value = ''
     }
   }
@@ -115,7 +115,7 @@ async function submit() {
   error.value = ''
   loading.value = true
   try {
-    const project = await projectsApi.create(name.value, slug.value)
+    const project = await projectsApi.create(name.value, key.value)
     emit('created', project)
     emit('update:open', false)
   } catch (e: unknown) {

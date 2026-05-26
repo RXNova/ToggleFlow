@@ -24,12 +24,27 @@
 
       <Separator />
 
+      <div class="relative">
+        <Search
+          class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none"
+        />
+        <Input v-model="search" placeholder="Search flags..." class="pl-8" />
+      </div>
+
       <div v-if="loading" class="flex flex-col items-center justify-center py-24">
         <Loader2 class="size-6 animate-spin text-muted-foreground/40" />
       </div>
 
       <div
-        v-else-if="flags.length === 0"
+        v-else-if="flags.length === 0 && search"
+        class="flex flex-col items-center justify-center py-24 text-center"
+      >
+        <SearchX class="size-8 text-muted-foreground/30 mb-3" />
+        <p class="text-sm font-medium">No flags match your search</p>
+      </div>
+
+      <div
+        v-else-if="total === 0"
         class="flex flex-col items-center justify-center py-24 text-center"
       >
         <FlagIcon class="size-8 text-muted-foreground/30 mb-3" />
@@ -39,70 +54,113 @@
         </p>
       </div>
 
-      <div v-else class="space-y-2">
-        <div v-for="flag in flags" :key="flag.id" class="rounded-lg border bg-card p-4">
-          <div class="flex items-start justify-between gap-4">
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-2">
-                <p class="text-sm font-medium">{{ flag.name }}</p>
-                <span
-                  class="rounded border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
-                >
-                  {{ flag.flag_type }}
-                </span>
-              </div>
-              <p class="text-xs font-mono text-muted-foreground mt-0.5">{{ flag.key }}</p>
-              <p v-if="flag.description" class="text-xs text-muted-foreground mt-1">
-                {{ flag.description }}
-              </p>
+      <template v-else>
+        <div class="space-y-2">
+          <div v-for="flag in flags" :key="flag.id" class="rounded-lg border bg-card p-4">
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0 flex-1">
+                <!-- Name + type badge + key -->
+                <div class="flex flex-wrap items-center gap-2">
+                  <p class="text-sm font-medium leading-none">{{ flag.name }}</p>
+                  <span
+                    class="inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                  >
+                    {{ flag.flag_type }}
+                  </span>
+                  <span class="font-mono text-[11px] text-muted-foreground">{{ flag.key }}</span>
+                </div>
 
-              <!-- Variation chips -->
-              <div v-if="flag.variations.length" class="mt-2 flex flex-wrap gap-1">
-                <span
-                  v-for="(v, i) in flag.variations"
-                  :key="i"
-                  class="rounded border bg-muted/40 px-1.5 py-0.5 text-[10px] font-mono"
+                <p v-if="flag.description" class="mt-1 text-xs text-muted-foreground">
+                  {{ flag.description }}
+                </p>
+
+                <!-- Variation chips -->
+                <div v-if="flag.variations.length" class="mt-2 flex flex-wrap gap-1">
+                  <span
+                    v-for="(v, i) in flag.variations"
+                    :key="i"
+                    class="rounded border bg-muted/40 px-1.5 py-0.5 text-[10px] font-mono"
+                  >
+                    {{ v.name }}:
+                    <span class="text-muted-foreground">{{ formatValue(v.value) }}</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex items-center gap-1 shrink-0">
+                <button
+                  class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  @click="openEdit(flag)"
                 >
-                  {{ v.name }}:
-                  <span class="text-muted-foreground">{{ formatValue(v.value) }}</span>
-                </span>
+                  <Pencil class="size-3.5" />
+                </button>
+                <button
+                  class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                  @click="openDelete(flag)"
+                >
+                  <Trash2 class="size-3.5" />
+                </button>
               </div>
             </div>
 
-            <button
-              class="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-              @click="deleteFlag(flag)"
-            >
-              <Trash2 class="size-3.5" />
-            </button>
-          </div>
-
-          <!-- Environment toggles -->
-          <div v-if="flag.environments.length > 0" class="mt-3 flex flex-wrap gap-3 border-t pt-3">
+            <!-- Environment toggles -->
             <div
-              v-for="env in flag.environments"
-              :key="env.environment_id"
-              class="flex items-center gap-2"
+              v-if="flag.environments.length > 0"
+              class="mt-3 flex flex-wrap gap-x-6 gap-y-2 border-t pt-3"
             >
-              <button
-                class="relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none disabled:pointer-events-none"
-                :class="env.enabled ? 'bg-primary' : 'bg-input'"
-                :disabled="toggling[toggleKey(flag.id, env.environment_id)]"
-                @click="toggle(flag, env)"
+              <div
+                v-for="env in flag.environments"
+                :key="env.environment_id"
+                class="flex items-center gap-2"
               >
-                <span
-                  class="pointer-events-none block h-3.5 w-3.5 rounded-full bg-background shadow-sm ring-0 transition-transform"
-                  :class="env.enabled ? 'translate-x-3' : 'translate-x-0'"
-                />
-              </button>
-              <span class="text-xs text-muted-foreground">{{ env.environment_name }}</span>
+                <button
+                  class="relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none disabled:pointer-events-none"
+                  :class="env.enabled ? 'bg-primary' : 'bg-input'"
+                  :disabled="toggling[toggleKey(flag.id, env.environment_id)]"
+                  @click="toggle(flag, env)"
+                >
+                  <span
+                    class="pointer-events-none block h-3.5 w-3.5 rounded-full bg-background shadow-sm ring-0 transition-transform"
+                    :class="env.enabled ? 'translate-x-3' : 'translate-x-0'"
+                  />
+                </button>
+                <span class="text-xs text-muted-foreground">{{ env.environment_name }}</span>
+                <!-- Default variation selector -->
+                <select
+                  v-if="flag.variations.length > 1"
+                  :value="env.default_variation"
+                  class="rounded border border-input bg-background px-1.5 py-0.5 text-[11px] text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                  @change="changeDefaultVariation(flag, env, $event)"
+                >
+                  <option v-for="(v, i) in flag.variations" :key="i" :value="i">
+                    {{ v.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <p v-else class="mt-3 text-xs text-muted-foreground border-t pt-3">
+              {{ $t('flags.noEnvironments') }}
+            </p>
+
+            <!-- Metadata -->
+            <div
+              class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-3 text-xs text-muted-foreground"
+            >
+              <span class="flex items-center gap-1">
+                <CalendarDays class="size-3 shrink-0" />
+                {{ timeAgo(flag.created_at) }}
+              </span>
+              <span class="flex items-center gap-1">
+                <Clock class="size-3 shrink-0" />
+                {{ timeAgo(flag.updated_at) }}
+              </span>
             </div>
           </div>
-          <p v-else class="mt-3 text-xs text-muted-foreground border-t pt-3">
-            {{ $t('flags.noEnvironments') }}
-          </p>
         </div>
-      </div>
+
+        <Pagination :page="page" :total="total" :limit="limit" @change="goTo" />
+      </template>
     </template>
   </div>
 
@@ -112,21 +170,62 @@
     :project-id="projectStore.current.id"
     @created="onCreated"
   />
+  <EditFlagDialog
+    v-if="projectStore.current"
+    v-model:open="editDialogOpen"
+    :flag="editTarget"
+    :project-id="projectStore.current.id"
+    @updated="onUpdated"
+  />
+  <DeleteFlagDialog
+    v-if="projectStore.current"
+    v-model:open="deleteDialogOpen"
+    :flag="deleteTarget"
+    :project-id="projectStore.current.id"
+    @deleted="onDeleted"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Flag as FlagIcon, Plus, FolderOpen, Loader2, Trash2 } from '@lucide/vue'
+import { watchDebounced } from '@vueuse/core'
+import {
+  Flag as FlagIcon,
+  Plus,
+  FolderOpen,
+  Loader2,
+  Pencil,
+  Trash2,
+  Search,
+  SearchX,
+  CalendarDays,
+  Clock,
+} from '@lucide/vue'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+import Pagination from '@/components/ui/pagination/Pagination.vue'
 import { useProjectStore } from '@/stores/project'
 import { flagsApi, type Flag, type FlagEnvState } from '@/api/flags'
+import { timeAgo } from '@/lib/utils'
 import CreateFlagDialog from '@/components/CreateFlagDialog.vue'
+import EditFlagDialog from '@/components/EditFlagDialog.vue'
+import DeleteFlagDialog from '@/components/DeleteFlagDialog.vue'
+
+const LIMIT = 20
 
 const projectStore = useProjectStore()
 const flags = ref<Flag[]>([])
+const total = ref(0)
+const page = ref(1)
+const limit = ref(LIMIT)
+const search = ref('')
 const loading = ref(false)
 const createDialogOpen = ref(false)
+const editDialogOpen = ref(false)
+const editTarget = ref<Flag | null>(null)
+const deleteDialogOpen = ref(false)
+const deleteTarget = ref<Flag | null>(null)
 const toggling = ref<Record<string, boolean>>({})
 
 function toggleKey(flagId: number, envId: number) {
@@ -144,16 +243,63 @@ async function load() {
   if (!projectStore.current) return
   loading.value = true
   try {
-    flags.value = (await flagsApi.list(projectStore.current.id)).data ?? []
+    const res = await flagsApi.list(projectStore.current.id, {
+      limit: limit.value,
+      offset: (page.value - 1) * limit.value,
+      search: search.value || undefined,
+    })
+    flags.value = res.data ?? []
+    total.value = res.total
   } finally {
     loading.value = false
   }
 }
 
+watchDebounced(
+  search,
+  () => {
+    page.value = 1
+    load()
+  },
+  { debounce: 300 }
+)
+
 watch(() => projectStore.current, load, { immediate: true })
+
+function goTo(p: number) {
+  page.value = p
+  load()
+}
+
+function openEdit(flag: Flag) {
+  editTarget.value = flag
+  editDialogOpen.value = true
+}
+
+function openDelete(flag: Flag) {
+  deleteTarget.value = flag
+  deleteDialogOpen.value = true
+}
 
 function onCreated() {
   load()
+}
+
+function onUpdated(updated: Flag) {
+  const i = flags.value.findIndex((f) => f.id === updated.id)
+  if (i !== -1) {
+    // preserve live environment state from the list — backend update returns nil envs
+    flags.value[i] = { ...updated, environments: flags.value[i].environments }
+  }
+}
+
+function onDeleted(flag: Flag) {
+  flags.value = flags.value.filter((f) => f.id !== flag.id)
+  total.value--
+  if (page.value > 1 && flags.value.length === 0) {
+    page.value--
+    load()
+  }
 }
 
 async function toggle(flag: Flag, env: FlagEnvState) {
@@ -177,14 +323,21 @@ async function toggle(flag: Flag, env: FlagEnvState) {
   }
 }
 
-async function deleteFlag(flag: Flag) {
+async function changeDefaultVariation(flag: Flag, env: FlagEnvState, event: Event) {
   if (!projectStore.current) return
-  if (!confirm(`Delete flag "${flag.name}"?`)) return
+  const newVariation = Number((event.target as HTMLSelectElement).value)
+  const prev = env.default_variation
+  env.default_variation = newVariation
   try {
-    await flagsApi.delete(projectStore.current.id, flag.key)
-    flags.value = flags.value.filter((f) => f.id !== flag.id)
+    await flagsApi.toggle(
+      projectStore.current.id,
+      flag.key,
+      env.environment_id,
+      env.enabled,
+      newVariation
+    )
   } catch {
-    // ignore
+    env.default_variation = prev
   }
 }
 </script>

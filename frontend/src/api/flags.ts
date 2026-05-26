@@ -41,6 +41,11 @@ export const flagsApi = {
       variations: Variation[]
     }
   ) => api.post<Flag>(`/projects/${projectId}/flags`, data),
+  update: (
+    projectId: number,
+    flagKey: string,
+    data: { name: string; description: string; variations: Variation[] }
+  ) => api.patch<Flag>(`/projects/${projectId}/flags/${flagKey}`, data),
   toggle: (
     projectId: number,
     flagKey: string,
@@ -48,7 +53,7 @@ export const flagsApi = {
     enabled: boolean,
     defaultVariation: number
   ) =>
-    api.patch<{ ok: boolean }>(`/projects/${projectId}/flags/${flagKey}`, {
+    api.patch<{ ok: boolean }>(`/projects/${projectId}/flags/${flagKey}/env`, {
       environment_id: environmentId,
       enabled,
       default_variation: defaultVariation,

@@ -52,7 +52,7 @@
                 <p class="text-sm font-medium leading-none">{{ project.name }}</p>
                 <span
                   class="inline-flex items-center rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground"
-                  >{{ project.slug }}</span
+                  >{{ project.key }}</span
                 >
               </div>
               <div

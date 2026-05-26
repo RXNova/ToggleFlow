@@ -17,13 +17,13 @@ import (
 // ProjectResponse is the API shape for a project, including the creator's name
 // resolved via a LEFT JOIN on users in ListProjects.
 type ProjectResponse struct {
-	ID            int64     `bun:"id"            json:"id"`
-	Name          string    `bun:"name"          json:"name"`
-	Slug          string    `bun:"slug"          json:"slug"`
-	CreatedBy     *int64    `bun:"created_by"    json:"created_by,omitempty"`
+	ID            int64     `bun:"id"              json:"id"`
+	Name          string    `bun:"name"            json:"name"`
+	Key           string    `bun:"key"             json:"key"`
+	CreatedBy     *int64    `bun:"created_by"      json:"created_by,omitempty"`
 	CreatedByName string    `bun:"created_by_name" json:"created_by_name"`
-	CreatedAt     time.Time `bun:"created_at"    json:"created_at"`
-	UpdatedAt     time.Time `bun:"updated_at"    json:"updated_at"`
+	CreatedAt     time.Time `bun:"created_at"      json:"created_at"`
+	UpdatedAt     time.Time `bun:"updated_at"      json:"updated_at"`
 }
 
 func (h *handler) ListProjects(c *fiber.Ctx) error {
@@ -56,7 +56,7 @@ func (h *handler) ListProjects(c *fiber.Ctx) error {
 
 type createProjectRequest struct {
 	Name string `json:"name"`
-	Slug string `json:"slug"`
+	Key  string `json:"key"`
 }
 
 func (h *handler) CreateProject(c *fiber.Ctx) error {
@@ -68,15 +68,15 @@ func (h *handler) CreateProject(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "name is required"})
 	}
 
-	slug := req.Slug
-	if slug == "" {
-		slug = slugify(req.Name)
+	key := req.Key
+	if key == "" {
+		key = slugify(req.Name)
 	}
 
 	claims := auth.GetClaims(c)
 	project := &db.Project{
 		Name:      req.Name,
-		Slug:      slug,
+		Key:       key,
 		CreatedBy: &claims.UserID,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -84,7 +84,7 @@ func (h *handler) CreateProject(c *fiber.Ctx) error {
 
 	if _, err := h.db.NewInsert().Model(project).Exec(context.Background()); err != nil {
 		if strings.Contains(err.Error(), "UNIQUE") {
-			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "a project with that slug already exists"})
+			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "a project with that key already exists"})
 		}
 		return c.Status(500).JSON(fiber.Map{"error": "failed to create project"})
 	}
@@ -94,7 +94,7 @@ func (h *handler) CreateProject(c *fiber.Ctx) error {
 
 type updateProjectRequest struct {
 	Name string `json:"name"`
-	Slug string `json:"slug"`
+	Key  string `json:"key"`
 }
 
 func (h *handler) UpdateProject(c *fiber.Ctx) error {
@@ -118,13 +118,13 @@ func (h *handler) UpdateProject(c *fiber.Ctx) error {
 	}
 
 	project.Name = req.Name
-	if req.Slug != "" {
-		project.Slug = req.Slug
+	if req.Key != "" {
+		project.Key = req.Key
 	}
 	project.UpdatedAt = time.Now()
-	if _, err := h.db.NewUpdate().Model(&project).Column("name", "slug", "updated_at").Where("id = ?", pid).Exec(ctx); err != nil {
+	if _, err := h.db.NewUpdate().Model(&project).Column("name", "key", "updated_at").Where("id = ?", pid).Exec(ctx); err != nil {
 		if strings.Contains(err.Error(), "UNIQUE") {
-			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "a project with that slug already exists"})
+			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "a project with that key already exists"})
 		}
 		return c.Status(500).JSON(fiber.Map{"error": "failed to update project"})
 	}

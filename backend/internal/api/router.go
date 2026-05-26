@@ -47,6 +47,7 @@ func Register(app *fiber.App, database *bun.DB) {
 	flagsWrite := protected.Group("/projects/:pid/flags", auth.RequireRole(db.RoleEditor))
 	flagsWrite.Post("/", h.CreateFlag)
 	flagsWrite.Patch("/:key", h.UpdateFlag)
+	flagsWrite.Patch("/:key/env", h.ToggleFlagEnv)
 	flagsWrite.Delete("/:key", h.DeleteFlag)
 
 	// SDK — authenticated by sdk_key query param, not JWT

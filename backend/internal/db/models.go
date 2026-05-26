@@ -13,7 +13,7 @@ type Project struct {
 	bun.BaseModel `bun:"table:projects"`
 	ID            int64     `bun:"id,pk,autoincrement"                          json:"id"`
 	Name          string    `bun:"name,notnull"                                 json:"name"`
-	Slug          string    `bun:"slug,notnull,unique"                          json:"slug"`
+	Key           string    `bun:"key,notnull,unique"                           json:"key"`
 	CreatedBy     *int64    `bun:"created_by"                                   json:"created_by,omitempty"`
 	CreatedAt     time.Time `bun:"created_at,notnull,default:current_timestamp" json:"created_at"`
 	UpdatedAt     time.Time `bun:"updated_at,notnull,default:current_timestamp" json:"updated_at"`

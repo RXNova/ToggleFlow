@@ -20,14 +20,14 @@
         </div>
 
         <div class="space-y-2">
-          <Label for="edit-project-slug">{{ $t('projects.slug') }}</Label>
+          <Label for="edit-project-key">{{ $t('projects.key') }}</Label>
           <Input
-            id="edit-project-slug"
-            v-model="slug"
+            id="edit-project-key"
+            v-model="key"
             placeholder="my-project"
             class="mt-2 font-mono"
             required
-            @focus="slugTouched = true"
+            @focus="keyTouched = true"
           />
         </div>
 
@@ -74,15 +74,15 @@ const emit = defineEmits<{
 }>()
 
 const name = ref('')
-const slugRaw = ref('')
-const slugTouched = ref(false)
+const keyRaw = ref('')
+const keyTouched = ref(false)
 const loading = ref(false)
 const error = ref('')
 
-const slug = computed({
-  get: () => slugRaw.value,
+const key = computed({
+  get: () => keyRaw.value,
   set: (v: string) => {
-    slugRaw.value = v.toLowerCase().replace(/[^a-z0-9-]/g, '')
+    keyRaw.value = v.toLowerCase().replace(/[^a-z0-9-]/g, '')
   },
 })
 
@@ -94,7 +94,7 @@ function slugify(s: string) {
 }
 
 watch(name, (v: string) => {
-  if (!slugTouched.value) slugRaw.value = slugify(v)
+  if (!keyTouched.value) keyRaw.value = slugify(v)
 })
 
 watch(
@@ -102,8 +102,8 @@ watch(
   (p) => {
     if (p) {
       name.value = p.name
-      slugRaw.value = p.slug
-      slugTouched.value = false
+      keyRaw.value = p.key
+      keyTouched.value = false
       error.value = ''
     }
   },
@@ -115,8 +115,8 @@ watch(
   (v: boolean) => {
     if (v && props.project) {
       name.value = props.project.name
-      slugRaw.value = props.project.slug
-      slugTouched.value = false
+      keyRaw.value = props.project.key
+      keyTouched.value = false
       error.value = ''
     }
   }
@@ -127,7 +127,7 @@ async function submit() {
   error.value = ''
   loading.value = true
   try {
-    const updated = await projectsApi.update(props.project.id, name.value, slug.value)
+    const updated = await projectsApi.update(props.project.id, name.value, key.value)
     emit('updated', updated)
     emit('update:open', false)
   } catch (e: unknown) {

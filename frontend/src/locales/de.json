@@ -72,7 +72,7 @@
     "deleteTypePrompt": "Geben Sie den Projektnamen zur Bestätigung ein:",
     "deleteConfirmButton": "Projekt löschen",
     "deleting": "Wird gelöscht...",
-    "slug": "Slug",
+    "key": "Schlüssel",
     "search": "Projekte suchen...",
     "noResults": "Keine Projekte gefunden",
     "createdBy": "von {name}",

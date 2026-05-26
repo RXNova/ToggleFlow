@@ -238,13 +238,59 @@ func (h *handler) CreateFlag(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(parseFlagResponse(*flag, []FlagEnvState{}))
 }
 
+type updateFlagRequest struct {
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Variations  []Variation `json:"variations"`
+}
+
+func (h *handler) UpdateFlag(c *fiber.Ctx) error {
+	pid, err := strconv.ParseInt(c.Params("pid"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid project id"})
+	}
+
+	ctx := context.Background()
+	var flag db.Flag
+	if err := h.db.NewSelect().Model(&flag).Where("project_id = ? AND key = ?", pid, c.Params("key")).Scan(ctx); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "flag not found"})
+	}
+
+	var req updateFlagRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid body"})
+	}
+	if req.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "name is required"})
+	}
+	if len(req.Variations) < 2 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "at least 2 variations are required"})
+	}
+
+	variationsJSON, err := json.Marshal(req.Variations)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "failed to encode variations"})
+	}
+
+	flag.Name = req.Name
+	flag.Description = req.Description
+	flag.Variations = string(variationsJSON)
+	flag.UpdatedAt = time.Now()
+
+	if _, err := h.db.NewUpdate().Model(&flag).Column("name", "description", "variations", "updated_at").Where("id = ?", flag.ID).Exec(ctx); err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "failed to update flag"})
+	}
+
+	return c.JSON(parseFlagResponse(flag, nil))
+}
+
 type toggleFlagRequest struct {
 	EnvironmentID    int64 `json:"environment_id"`
 	Enabled          bool  `json:"enabled"`
 	DefaultVariation int   `json:"default_variation"`
 }
 
-func (h *handler) UpdateFlag(c *fiber.Ctx) error {
+func (h *handler) ToggleFlagEnv(c *fiber.Ctx) error {
 	pid, err := strconv.ParseInt(c.Params("pid"), 10, 64)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid project id"})
