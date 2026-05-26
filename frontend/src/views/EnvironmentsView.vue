@@ -95,7 +95,7 @@ async function load() {
   if (!projectStore.current) return
   loading.value = true
   try {
-    environments.value = await environmentsApi.list(projectStore.current.id) ?? []
+    environments.value = (await environmentsApi.list(projectStore.current.id)).data ?? []
   } finally {
     loading.value = false
   }

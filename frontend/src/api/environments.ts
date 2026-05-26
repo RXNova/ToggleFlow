@@ -1,4 +1,4 @@
-import { api } from './client'
+import { api, type PageResult, type PageParams } from './client'
 
 export interface Environment {
   id: number
@@ -10,7 +10,8 @@ export interface Environment {
 }
 
 export const environmentsApi = {
-  list: (projectId: number) => api.get<Environment[]>(`/projects/${projectId}/environments`),
+  list: (projectId: number, params?: PageParams) =>
+    api.get<PageResult<Environment>>(`/projects/${projectId}/environments`, params),
   create: (projectId: number, name: string) =>
     api.post<Environment>(`/projects/${projectId}/environments`, { name }),
 }

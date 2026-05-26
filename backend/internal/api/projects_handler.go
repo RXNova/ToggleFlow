@@ -7,18 +7,31 @@ import (
 	"strings"
 	"time"
 
-	"github.com/RXNova/ToggleFlow/internal/db"
+	"toggleflow/internal/db"
 	"github.com/gofiber/fiber/v2"
 	"github.com/uptrace/bun"
 )
 
 func (h *handler) ListProjects(c *fiber.Ctx) error {
-	projects := make([]db.Project, 0)
-	err := h.db.NewSelect().Model(&projects).OrderExpr("created_at ASC").Scan(context.Background())
+	pq := parsePage(c)
+	ctx := context.Background()
+
+	q := h.db.NewSelect().Model((*db.Project)(nil)).OrderExpr("created_at ASC")
+	if pq.Search != "" {
+		q = q.Where("lower(name) LIKE lower(?)", "%"+pq.Search+"%")
+	}
+
+	total, err := q.Count(ctx)
 	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "failed to count projects"})
+	}
+
+	projects := make([]db.Project, 0)
+	if err := q.Limit(pq.Limit).Offset(pq.Offset).Scan(ctx, &projects); err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "failed to fetch projects"})
 	}
-	return c.JSON(projects)
+
+	return c.JSON(Page[db.Project]{Data: projects, Total: total, Limit: pq.Limit, Offset: pq.Offset})
 }
 
 type createProjectRequest struct {
@@ -59,6 +72,7 @@ func (h *handler) CreateProject(c *fiber.Ctx) error {
 
 type updateProjectRequest struct {
 	Name string `json:"name"`
+	Slug string `json:"slug"`
 }
 
 func (h *handler) UpdateProject(c *fiber.Ctx) error {
@@ -82,8 +96,14 @@ func (h *handler) UpdateProject(c *fiber.Ctx) error {
 	}
 
 	project.Name = req.Name
+	if req.Slug != "" {
+		project.Slug = req.Slug
+	}
 	project.UpdatedAt = time.Now()
-	if _, err := h.db.NewUpdate().Model(&project).Column("name", "updated_at").Where("id = ?", pid).Exec(ctx); err != nil {
+	if _, err := h.db.NewUpdate().Model(&project).Column("name", "slug", "updated_at").Where("id = ?", pid).Exec(ctx); err != nil {
+		if strings.Contains(err.Error(), "UNIQUE") {
+			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "a project with that slug already exists"})
+		}
 		return c.Status(500).JSON(fiber.Map{"error": "failed to update project"})
 	}
 

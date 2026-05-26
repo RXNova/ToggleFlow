@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/RXNova/ToggleFlow/internal/db"
+	"toggleflow/internal/db"
 	"github.com/gofiber/fiber/v2"
 	"github.com/uptrace/bun"
 )
@@ -77,10 +77,21 @@ func (h *handler) ListFlags(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid project id"})
 	}
+	pq := parsePage(c)
 	ctx := context.Background()
 
+	fq := h.db.NewSelect().Model((*db.Flag)(nil)).Where("project_id = ?", pid).OrderExpr("created_at ASC")
+	if pq.Search != "" {
+		fq = fq.Where("lower(name) LIKE lower(?) OR lower(key) LIKE lower(?)", "%"+pq.Search+"%", "%"+pq.Search+"%")
+	}
+
+	total, err := fq.Count(ctx)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "failed to count flags"})
+	}
+
 	flags := make([]db.Flag, 0)
-	if err := h.db.NewSelect().Model(&flags).Where("project_id = ?", pid).OrderExpr("created_at ASC").Scan(ctx); err != nil {
+	if err := fq.Limit(pq.Limit).Offset(pq.Offset).Scan(ctx, &flags); err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "failed to fetch flags"})
 	}
 
@@ -126,7 +137,7 @@ func (h *handler) ListFlags(c *fiber.Ctx) error {
 		}
 	}
 
-	return c.JSON(result)
+	return c.JSON(Page[FlagResponse]{Data: result, Total: total, Limit: pq.Limit, Offset: pq.Offset})
 }
 
 type createFlagRequest struct {

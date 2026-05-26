@@ -3,7 +3,7 @@ package auth
 import (
 	"strings"
 
-	"github.com/RXNova/ToggleFlow/internal/db"
+	"toggleflow/internal/db"
 	"github.com/gofiber/fiber/v2"
 )
 

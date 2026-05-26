@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/RXNova/ToggleFlow/internal/db"
+	"toggleflow/internal/db"
 	"github.com/golang-jwt/jwt/v5"
 )
 

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/RXNova/ToggleFlow/internal/db"
+	"toggleflow/internal/db"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -18,11 +18,25 @@ func (h *handler) ListEnvironments(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid project id"})
 	}
 
+	pq := parsePage(c)
+	ctx := context.Background()
+
+	q := h.db.NewSelect().Model((*db.Environment)(nil)).Where("project_id = ?", pid).OrderExpr("created_at ASC")
+	if pq.Search != "" {
+		q = q.Where("lower(name) LIKE lower(?)", "%"+pq.Search+"%")
+	}
+
+	total, err := q.Count(ctx)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "failed to count environments"})
+	}
+
 	envs := make([]db.Environment, 0)
-	if err := h.db.NewSelect().Model(&envs).Where("project_id = ?", pid).OrderExpr("created_at ASC").Scan(context.Background()); err != nil {
+	if err := q.Limit(pq.Limit).Offset(pq.Offset).Scan(ctx, &envs); err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "failed to fetch environments"})
 	}
-	return c.JSON(envs)
+
+	return c.JSON(Page[db.Environment]{Data: envs, Total: total, Limit: pq.Limit, Offset: pq.Offset})
 }
 
 type createEnvironmentRequest struct {

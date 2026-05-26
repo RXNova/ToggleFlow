@@ -1,4 +1,4 @@
-import { api } from './client'
+import { api, type PageResult, type PageParams } from './client'
 
 export type FlagType = 'boolean' | 'string' | 'number' | 'json'
 
@@ -29,7 +29,8 @@ export interface Flag {
 }
 
 export const flagsApi = {
-  list: (projectId: number) => api.get<Flag[]>(`/projects/${projectId}/flags`),
+  list: (projectId: number, params?: PageParams) =>
+    api.get<PageResult<Flag>>(`/projects/${projectId}/flags`, params),
   create: (projectId: number, data: { name: string; key: string; description?: string; flag_type: FlagType; variations: Variation[] }) =>
     api.post<Flag>(`/projects/${projectId}/flags`, data),
   toggle: (projectId: number, flagKey: string, environmentId: number, enabled: boolean, defaultVariation: number) =>

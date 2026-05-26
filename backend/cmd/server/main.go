@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/RXNova/ToggleFlow/internal/api"
-	"github.com/RXNova/ToggleFlow/internal/db"
-	"github.com/RXNova/ToggleFlow/internal/ui"
+	"toggleflow/internal/api"
+	"toggleflow/internal/db"
+	"toggleflow/internal/ui"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"

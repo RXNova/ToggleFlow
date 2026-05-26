@@ -1,4 +1,4 @@
-import { api } from './client'
+import { api, type PageResult, type PageParams } from './client'
 
 export interface Project {
   id: number
@@ -9,8 +9,12 @@ export interface Project {
 }
 
 export const projectsApi = {
-  list: () => api.get<Project[]>('/projects'),
-  create: (name: string, slug: string) => api.post<Project>('/projects', { name, slug }),
-  update: (id: number, name: string) => api.patch<Project>(`/projects/${id}`, { name }),
-  delete: (id: number) => api.delete<void>(`/projects/${id}`),
+  list: (params?: PageParams) =>
+    api.get<PageResult<Project>>('/projects', params),
+  create: (name: string, slug: string) =>
+    api.post<Project>('/projects', { name, slug }),
+  update: (id: number, name: string, slug: string) =>
+    api.patch<Project>(`/projects/${id}`, { name, slug }),
+  delete: (id: number) =>
+    api.delete<void>(`/projects/${id}`),
 }

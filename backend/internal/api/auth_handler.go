@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/RXNova/ToggleFlow/internal/auth"
-	"github.com/RXNova/ToggleFlow/internal/db"
+	"toggleflow/internal/auth"
+	"toggleflow/internal/db"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 )

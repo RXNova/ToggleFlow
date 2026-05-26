@@ -19,6 +19,17 @@
           />
         </div>
 
+        <div class="space-y-2">
+          <Label for="edit-project-slug">{{ $t('projects.slug') }}</Label>
+          <Input
+            id="edit-project-slug"
+            v-model="slug"
+            placeholder="my-project"
+            class="mt-2 font-mono"
+            required
+          />
+        </div>
+
         <Alert v-if="error" variant="destructive">
           <AlertCircle class="size-4" />
           <AlertDescription>{{ error }}</AlertDescription>
@@ -55,15 +66,16 @@ const emit = defineEmits<{
 }>()
 
 const name = ref('')
+const slug = ref('')
 const loading = ref(false)
 const error = ref('')
 
 watch(() => props.project, (p) => {
-  if (p) { name.value = p.name; error.value = '' }
+  if (p) { name.value = p.name; slug.value = p.slug; error.value = '' }
 }, { immediate: true })
 
 watch(() => props.open, (v) => {
-  if (v && props.project) { name.value = props.project.name; error.value = '' }
+  if (v && props.project) { name.value = props.project.name; slug.value = props.project.slug; error.value = '' }
 })
 
 async function submit() {
@@ -71,7 +83,7 @@ async function submit() {
   error.value = ''
   loading.value = true
   try {
-    const updated = await projectsApi.update(props.project.id, name.value)
+    const updated = await projectsApi.update(props.project.id, name.value, slug.value)
     emit('updated', updated)
     emit('update:open', false)
   } catch (e: unknown) {

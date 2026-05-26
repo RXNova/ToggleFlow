@@ -136,7 +136,7 @@ async function load() {
   if (!projectStore.current) return
   loading.value = true
   try {
-    flags.value = await flagsApi.list(projectStore.current.id) ?? []
+    flags.value = (await flagsApi.list(projectStore.current.id)).data ?? []
   } finally {
     loading.value = false
   }

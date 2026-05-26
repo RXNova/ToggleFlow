@@ -1,4 +1,4 @@
-module github.com/RXNova/ToggleFlow
+module toggleflow
 
 go 1.25.0
 

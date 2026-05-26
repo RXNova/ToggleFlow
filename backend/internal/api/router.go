@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/RXNova/ToggleFlow/internal/auth"
-	"github.com/RXNova/ToggleFlow/internal/db"
+	"toggleflow/internal/auth"
+	"toggleflow/internal/db"
 	"github.com/gofiber/fiber/v2"
 	"github.com/uptrace/bun"
 )

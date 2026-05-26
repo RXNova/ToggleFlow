@@ -74,8 +74,8 @@ const projectStore = useProjectStore()
 
 onMounted(async () => {
   try {
-    const list = await projectsApi.list()
-    projectStore.setProjects(list)
+    const res = await projectsApi.list({ limit: 100 })
+    projectStore.setProjects(res.data)
   } catch {
     // user may not have permission — leave empty
   }
