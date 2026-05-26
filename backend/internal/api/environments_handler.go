@@ -41,7 +41,8 @@ func (h *handler) ListEnvironments(c *fiber.Ctx) error {
 }
 
 type createEnvironmentRequest struct {
-	Name string `json:"name"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 func (h *handler) CreateEnvironment(c *fiber.Ctx) error {
@@ -64,11 +65,13 @@ func (h *handler) CreateEnvironment(c *fiber.Ctx) error {
 	}
 
 	env := &db.Environment{
-		ProjectID: pid,
-		Name:      req.Name,
-		Slug:      slugify(req.Name),
-		SDKKey:    sdkKey,
-		CreatedAt: time.Now(),
+		ProjectID:   pid,
+		Name:        req.Name,
+		Slug:        slugify(req.Name),
+		Description: req.Description,
+		SDKKey:      sdkKey,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 
 	if _, err := h.db.NewInsert().Model(env).Exec(context.Background()); err != nil {
@@ -79,6 +82,59 @@ func (h *handler) CreateEnvironment(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(env)
+}
+
+type updateEnvironmentRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+func (h *handler) UpdateEnvironment(c *fiber.Ctx) error {
+	eid, err := strconv.ParseInt(c.Params("eid"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid environment id"})
+	}
+
+	ctx := context.Background()
+	var env db.Environment
+	if err := h.db.NewSelect().Model(&env).Where("id = ?", eid).Scan(ctx); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "environment not found"})
+	}
+
+	var req updateEnvironmentRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid body"})
+	}
+	if req.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "name is required"})
+	}
+
+	env.Name = req.Name
+	env.Description = req.Description
+	env.UpdatedAt = time.Now()
+
+	if _, err := h.db.NewUpdate().Model(&env).Column("name", "description", "updated_at").Where("id = ?", eid).Exec(ctx); err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "failed to update environment"})
+	}
+
+	return c.JSON(env)
+}
+
+func (h *handler) DeleteEnvironment(c *fiber.Ctx) error {
+	eid, err := strconv.ParseInt(c.Params("eid"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid environment id"})
+	}
+
+	ctx := context.Background()
+
+	_, _ = h.db.NewDelete().TableExpr("flag_environments").Where("environment_id = ?", eid).Exec(ctx)
+
+	if _, err := h.db.NewDelete().TableExpr("environments").Where("id = ?", eid).Exec(ctx); err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "failed to delete environment"})
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
 }
 
 func generateSDKKey() (string, error) {

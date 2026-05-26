@@ -4,6 +4,7 @@ export interface Project {
   id: number
   name: string
   key: string
+  description: string
   created_by: number | null
   created_by_name: string
   created_at: string
@@ -12,8 +13,9 @@ export interface Project {
 
 export const projectsApi = {
   list: (params?: PageParams) => api.get<PageResult<Project>>('/projects', params),
-  create: (name: string, key: string) => api.post<Project>('/projects', { name, key }),
-  update: (id: number, name: string, key: string) =>
-    api.patch<Project>(`/projects/${id}`, { name, key }),
+  create: (name: string, key: string, description: string) =>
+    api.post<Project>('/projects', { name, key, description }),
+  update: (id: number, name: string, key: string, description: string) =>
+    api.patch<Project>(`/projects/${id}`, { name, key, description }),
   delete: (id: number) => api.delete<void>(`/projects/${id}`),
 }

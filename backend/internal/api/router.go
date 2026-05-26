@@ -38,6 +38,8 @@ func Register(app *fiber.App, database *bun.DB) {
 	projects.Delete("/:id", h.DeleteProject)
 	projects.Post("/:pid/environments", h.CreateEnvironment)
 	projects.Get("/:pid/environments", h.ListEnvironments)
+	projects.Patch("/:pid/environments/:eid", h.UpdateEnvironment)
+	projects.Delete("/:pid/environments/:eid", h.DeleteEnvironment)
 
 	// Flags — Editor and above to write, Viewer to read
 	protected.Get("/projects/:pid/flags", h.ListFlags)

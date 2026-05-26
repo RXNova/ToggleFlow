@@ -55,6 +55,9 @@
                   >{{ project.key }}</span
                 >
               </div>
+              <p v-if="project.description" class="mt-1 text-xs text-muted-foreground">
+                {{ project.description }}
+              </p>
               <div
                 class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground"
               >

@@ -24,12 +24,10 @@
 
       <Separator />
 
-      <!-- Loading -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
         <Loader2 class="size-6 animate-spin text-muted-foreground/40 mb-3" />
       </div>
 
-      <!-- Empty -->
       <div
         v-else-if="environments.length === 0"
         class="flex flex-col items-center justify-center py-24 text-center"
@@ -41,7 +39,6 @@
         </p>
       </div>
 
-      <!-- List -->
       <div v-else class="space-y-2">
         <div
           v-for="env in environments"
@@ -49,9 +46,31 @@
           class="rounded-lg border bg-card p-4 space-y-3"
         >
           <div class="flex items-start justify-between gap-4">
-            <div class="min-w-0">
-              <p class="text-sm font-medium">{{ env.name }}</p>
-              <p class="text-xs text-muted-foreground font-mono mt-0.5">{{ env.slug }}</p>
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <p class="text-sm font-medium leading-none">{{ env.name }}</p>
+                <span
+                  class="inline-flex items-center rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground"
+                  >{{ env.slug }}</span
+                >
+              </div>
+              <p v-if="env.description" class="mt-1 text-xs text-muted-foreground">
+                {{ env.description }}
+              </p>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button
+                class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                @click="openEdit(env)"
+              >
+                <Pencil class="size-3.5" />
+              </button>
+              <button
+                class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                @click="openDelete(env)"
+              >
+                <Trash2 class="size-3.5" />
+              </button>
             </div>
           </div>
 
@@ -76,21 +95,41 @@
     :project-id="projectStore.current.id"
     @created="onCreated"
   />
+  <EditEnvironmentDialog
+    v-if="projectStore.current"
+    v-model:open="editDialogOpen"
+    :environment="editTarget"
+    :project-id="projectStore.current.id"
+    @updated="onUpdated"
+  />
+  <DeleteEnvironmentDialog
+    v-if="projectStore.current"
+    v-model:open="deleteDialogOpen"
+    :environment="deleteTarget"
+    :project-id="projectStore.current.id"
+    @deleted="onDeleted"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Globe, Plus, FolderOpen, Loader2, Copy, Check } from '@lucide/vue'
+import { Globe, Plus, FolderOpen, Loader2, Copy, Check, Pencil, Trash2 } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useProjectStore } from '@/stores/project'
 import { environmentsApi, type Environment } from '@/api/environments'
 import CreateEnvironmentDialog from '@/components/CreateEnvironmentDialog.vue'
+import EditEnvironmentDialog from '@/components/EditEnvironmentDialog.vue'
+import DeleteEnvironmentDialog from '@/components/DeleteEnvironmentDialog.vue'
 
 const projectStore = useProjectStore()
 const environments = ref<Environment[]>([])
 const loading = ref(false)
 const createDialogOpen = ref(false)
+const editDialogOpen = ref(false)
+const editTarget = ref<Environment | null>(null)
+const deleteDialogOpen = ref(false)
+const deleteTarget = ref<Environment | null>(null)
 const copiedId = ref<number | null>(null)
 
 async function load() {
@@ -107,6 +146,25 @@ watch(() => projectStore.current, load, { immediate: true })
 
 function onCreated(env: Environment) {
   environments.value.push(env)
+}
+
+function openEdit(env: Environment) {
+  editTarget.value = env
+  editDialogOpen.value = true
+}
+
+function openDelete(env: Environment) {
+  deleteTarget.value = env
+  deleteDialogOpen.value = true
+}
+
+function onUpdated(updated: Environment) {
+  const i = environments.value.findIndex((e) => e.id === updated.id)
+  if (i !== -1) environments.value[i] = updated
+}
+
+function onDeleted(env: Environment) {
+  environments.value = environments.value.filter((e) => e.id !== env.id)
 }
 
 function copy(key: string, id: number) {

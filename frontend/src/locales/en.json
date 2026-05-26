@@ -147,7 +147,9 @@
     }
   },
   "common": {
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "description": "Description",
+    "descriptionPlaceholder": "Optional description"
   },
   "lang": {
     "label": "Language",

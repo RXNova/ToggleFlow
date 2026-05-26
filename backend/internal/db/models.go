@@ -14,6 +14,7 @@ type Project struct {
 	ID            int64     `bun:"id,pk,autoincrement"                          json:"id"`
 	Name          string    `bun:"name,notnull"                                 json:"name"`
 	Key           string    `bun:"key,notnull,unique"                           json:"key"`
+	Description   string    `bun:"description,notnull,default:''"               json:"description"`
 	CreatedBy     *int64    `bun:"created_by"                                   json:"created_by,omitempty"`
 	CreatedAt     time.Time `bun:"created_at,notnull,default:current_timestamp" json:"created_at"`
 	UpdatedAt     time.Time `bun:"updated_at,notnull,default:current_timestamp" json:"updated_at"`
@@ -21,12 +22,14 @@ type Project struct {
 
 type Environment struct {
 	bun.BaseModel `bun:"table:environments"`
-	ID            int64     `bun:"id,pk,autoincrement"         json:"id"`
-	ProjectID     int64     `bun:"project_id,notnull"          json:"project_id"`
-	Name          string    `bun:"name,notnull"                json:"name"`
-	Slug          string    `bun:"slug,notnull"                json:"slug"`
-	SDKKey        string    `bun:"sdk_key,notnull,unique"      json:"sdk_key"`
+	ID            int64     `bun:"id,pk,autoincrement"                          json:"id"`
+	ProjectID     int64     `bun:"project_id,notnull"                           json:"project_id"`
+	Name          string    `bun:"name,notnull"                                 json:"name"`
+	Slug          string    `bun:"slug,notnull"                                 json:"slug"`
+	Description   string    `bun:"description,notnull,default:''"               json:"description"`
+	SDKKey        string    `bun:"sdk_key,notnull,unique"                       json:"sdk_key"`
 	CreatedAt     time.Time `bun:"created_at,notnull,default:current_timestamp" json:"created_at"`
+	UpdatedAt     time.Time `bun:"updated_at,notnull,default:current_timestamp" json:"updated_at"`
 }
 
 type Flag struct {

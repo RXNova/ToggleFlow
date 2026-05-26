@@ -31,6 +31,16 @@
           />
         </div>
 
+        <div class="space-y-2">
+          <Label for="edit-project-description">{{ $t('common.description') }}</Label>
+          <Input
+            id="edit-project-description"
+            v-model="description"
+            :placeholder="$t('common.descriptionPlaceholder')"
+            class="mt-2"
+          />
+        </div>
+
         <Alert v-if="error" variant="destructive">
           <AlertCircle class="size-4" />
           <AlertDescription>{{ error }}</AlertDescription>
@@ -76,6 +86,7 @@ const emit = defineEmits<{
 const name = ref('')
 const keyRaw = ref('')
 const keyTouched = ref(false)
+const description = ref('')
 const loading = ref(false)
 const error = ref('')
 
@@ -103,6 +114,7 @@ watch(
     if (p) {
       name.value = p.name
       keyRaw.value = p.key
+      description.value = p.description
       keyTouched.value = false
       error.value = ''
     }
@@ -116,6 +128,7 @@ watch(
     if (v && props.project) {
       name.value = props.project.name
       keyRaw.value = props.project.key
+      description.value = props.project.description
       keyTouched.value = false
       error.value = ''
     }
@@ -127,7 +140,12 @@ async function submit() {
   error.value = ''
   loading.value = true
   try {
-    const updated = await projectsApi.update(props.project.id, name.value, key.value)
+    const updated = await projectsApi.update(
+      props.project.id,
+      name.value,
+      key.value,
+      description.value
+    )
     emit('updated', updated)
     emit('update:open', false)
   } catch (e: unknown) {

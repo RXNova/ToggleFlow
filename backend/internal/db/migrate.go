@@ -36,6 +36,9 @@ func Migrate(db *bun.DB) error {
 		`ALTER TABLE flags ADD COLUMN variations TEXT NOT NULL DEFAULT '[]'`,
 		`ALTER TABLE projects ADD COLUMN created_by INTEGER REFERENCES users(id)`,
 		`ALTER TABLE projects RENAME COLUMN slug TO key`,
+		`ALTER TABLE projects ADD COLUMN description TEXT NOT NULL DEFAULT ''`,
+		`ALTER TABLE environments ADD COLUMN description TEXT NOT NULL DEFAULT ''`,
+		`ALTER TABLE environments ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`,
 	} {
 		_, _ = db.ExecContext(ctx, stmt)
 	}
