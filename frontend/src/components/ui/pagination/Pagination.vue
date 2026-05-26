@@ -1,8 +1,6 @@
 <template>
   <div v-if="totalPages > 1" class="flex items-center justify-between text-sm">
-    <p class="text-xs text-muted-foreground">
-      {{ rangeStart }}–{{ rangeEnd }} of {{ total }}
-    </p>
+    <p class="text-xs text-muted-foreground">{{ rangeStart }}–{{ rangeEnd }} of {{ total }}</p>
     <div class="flex items-center gap-1">
       <button
         class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
@@ -17,9 +15,11 @@
         <button
           v-else
           class="min-w-[2rem] rounded-md px-2 py-1 text-xs transition-colors"
-          :class="p === page
-            ? 'bg-primary text-primary-foreground font-medium'
-            : 'text-muted-foreground hover:bg-accent hover:text-foreground'"
+          :class="
+            p === page
+              ? 'bg-primary text-primary-foreground font-medium'
+              : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+          "
           @click="$emit('change', p as number)"
         >
           {{ p }}

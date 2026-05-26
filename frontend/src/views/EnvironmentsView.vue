@@ -4,7 +4,9 @@
       <div class="flex flex-col items-center justify-center py-24 text-center">
         <FolderOpen class="size-8 text-muted-foreground/30 mb-3" />
         <p class="text-sm font-medium">{{ $t('projects.noProject') }}</p>
-        <p class="mt-1 text-xs text-muted-foreground max-w-xs">{{ $t('projects.noProjectDescription') }}</p>
+        <p class="mt-1 text-xs text-muted-foreground max-w-xs">
+          {{ $t('projects.noProjectDescription') }}
+        </p>
       </div>
     </template>
 
@@ -28,10 +30,15 @@
       </div>
 
       <!-- Empty -->
-      <div v-else-if="environments.length === 0" class="flex flex-col items-center justify-center py-24 text-center">
+      <div
+        v-else-if="environments.length === 0"
+        class="flex flex-col items-center justify-center py-24 text-center"
+      >
         <Globe class="size-8 text-muted-foreground/30 mb-3" />
         <p class="text-sm font-medium">{{ $t('environments.emptyTitle') }}</p>
-        <p class="mt-1 text-xs text-muted-foreground max-w-xs">{{ $t('environments.emptyDescription') }}</p>
+        <p class="mt-1 text-xs text-muted-foreground max-w-xs">
+          {{ $t('environments.emptyDescription') }}
+        </p>
       </div>
 
       <!-- List -->
@@ -52,12 +59,7 @@
             <div class="flex-1 min-w-0 rounded-md border bg-muted/40 px-3 py-1.5">
               <p class="text-xs font-mono truncate text-muted-foreground">{{ env.sdk_key }}</p>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              class="shrink-0"
-              @click="copy(env.sdk_key, env.id)"
-            >
+            <Button size="sm" variant="outline" class="shrink-0" @click="copy(env.sdk_key, env.id)">
               <Check v-if="copiedId === env.id" class="size-3.5 text-green-500" />
               <Copy v-else class="size-3.5" />
               {{ copiedId === env.id ? $t('environments.copied') : $t('environments.sdkKey') }}
@@ -110,6 +112,8 @@ function onCreated(env: Environment) {
 function copy(key: string, id: number) {
   navigator.clipboard.writeText(key)
   copiedId.value = id
-  setTimeout(() => { copiedId.value = null }, 2000)
+  setTimeout(() => {
+    copiedId.value = null
+  }, 2000)
 }
 </script>

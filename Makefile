@@ -1,4 +1,4 @@
-.PHONY: dev dev-be dev-fe build docker docker-run
+.PHONY: dev dev-be dev-fe build docker docker-run lint lint-be lint-fe
 
 # Run backend and frontend concurrently in development
 dev:
@@ -17,6 +17,18 @@ build:
 	cd frontend && pnpm install && pnpm build
 	cp -r frontend/dist backend/internal/ui/dist
 	cd backend && go build -o ../dist/toggleflow ./cmd/server
+
+# Lint both frontend and backend
+lint:
+	make -j2 lint-be lint-fe
+
+# Run golangci-lint on the backend (install: brew install golangci-lint)
+lint-be:
+	cd backend && golangci-lint run ./...
+
+# Run ESLint on the frontend
+lint-fe:
+	cd frontend && pnpm lint:check
 
 # Build Docker image
 docker:

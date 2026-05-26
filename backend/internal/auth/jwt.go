@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"toggleflow/internal/db"
+
 	"github.com/golang-jwt/jwt/v5"
 )
 

@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen grid lg:grid-cols-2">
-
     <!-- Left: branding panel -->
     <div class="hidden lg:flex flex-col justify-between bg-primary text-primary-foreground p-8">
       <div class="flex items-center gap-2">
@@ -36,7 +35,6 @@
     <!-- Right: login form -->
     <div class="flex flex-col items-center justify-center bg-background px-8 py-10">
       <div class="w-full max-w-sm space-y-5">
-
         <!-- Mobile logo -->
         <div class="flex items-center gap-2 lg:hidden">
           <ToggleRight class="size-5 text-primary" />
@@ -89,7 +87,6 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -116,8 +113,8 @@ const loading = ref(false)
 const error = ref('')
 
 const features = computed(() => [
-  { icon: Flag,   label: t('brand.features.targeting') },
-  { icon: Zap,    label: t('brand.features.realtime') },
+  { icon: Flag, label: t('brand.features.targeting') },
+  { icon: Zap, label: t('brand.features.realtime') },
   { icon: Shield, label: t('brand.features.rbac') },
 ])
 

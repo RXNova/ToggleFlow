@@ -41,7 +41,14 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { AlertCircle, Loader2 } from '@lucide/vue'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -58,9 +65,15 @@ const name = ref('')
 const loading = ref(false)
 const error = ref('')
 
-watch(() => props.open, (v) => {
-  if (v) { name.value = ''; error.value = '' }
-})
+watch(
+  () => props.open,
+  (v) => {
+    if (v) {
+      name.value = ''
+      error.value = ''
+    }
+  }
+)
 
 async function submit() {
   error.value = ''

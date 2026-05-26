@@ -6,9 +6,10 @@ import (
 	"strconv"
 	"time"
 
-	"toggleflow/internal/db"
 	"github.com/gofiber/fiber/v2"
 	"github.com/uptrace/bun"
+
+	"toggleflow/internal/db"
 )
 
 var validFlagTypes = map[string]bool{
@@ -27,11 +28,11 @@ type Variation struct {
 }
 
 type FlagEnvState struct {
-	EnvironmentID   int64  `json:"environment_id"`
-	EnvironmentName string `json:"environment_name"`
-	EnvironmentSlug string `json:"environment_slug"`
-	Enabled         bool   `json:"enabled"`
-	DefaultVariation int   `json:"default_variation"`
+	EnvironmentID    int64  `json:"environment_id"`
+	EnvironmentName  string `json:"environment_name"`
+	EnvironmentSlug  string `json:"environment_slug"`
+	Enabled          bool   `json:"enabled"`
+	DefaultVariation int    `json:"default_variation"`
 }
 
 // FlagResponse is the API shape — expands the raw DB model with parsed variations
@@ -109,7 +110,7 @@ func (h *handler) ListFlags(c *fiber.Ctx) error {
 		}
 
 		var flagEnvs []db.FlagEnvironment
-		h.db.NewSelect().Model(&flagEnvs).Where("flag_id IN (?)", bun.In(flagIDs)).Scan(ctx)
+		_ = h.db.NewSelect().Model(&flagEnvs).Where("flag_id IN (?)", bun.In(flagIDs)).Scan(ctx)
 
 		type feKey struct{ flagID, envID int64 }
 		type feState struct {
@@ -230,7 +231,7 @@ func (h *handler) CreateFlag(c *fiber.Ctx) error {
 	if err := h.db.NewSelect().Model(&envs).Where("project_id = ?", pid).Scan(ctx); err == nil {
 		for _, env := range envs {
 			fe := &db.FlagEnvironment{FlagID: flag.ID, EnvironmentID: env.ID}
-			h.db.NewInsert().Model(fe).Exec(ctx)
+			_, _ = h.db.NewInsert().Model(fe).Exec(ctx)
 		}
 	}
 
@@ -263,11 +264,11 @@ func (h *handler) UpdateFlag(c *fiber.Ctx) error {
 	var fe db.FlagEnvironment
 	if err := h.db.NewSelect().Model(&fe).Where("flag_id = ? AND environment_id = ?", flag.ID, req.EnvironmentID).Scan(ctx); err != nil {
 		fe = db.FlagEnvironment{FlagID: flag.ID, EnvironmentID: req.EnvironmentID, Enabled: req.Enabled, DefaultVariation: req.DefaultVariation}
-		h.db.NewInsert().Model(&fe).Exec(ctx)
+		_, _ = h.db.NewInsert().Model(&fe).Exec(ctx)
 	} else {
 		fe.Enabled = req.Enabled
 		fe.DefaultVariation = req.DefaultVariation
-		h.db.NewUpdate().Model(&fe).Column("enabled", "default_variation").Where("id = ?", fe.ID).Exec(ctx)
+		_, _ = h.db.NewUpdate().Model(&fe).Column("enabled", "default_variation").Where("id = ?", fe.ID).Exec(ctx)
 	}
 
 	return c.JSON(fiber.Map{"ok": true})
@@ -298,7 +299,7 @@ func (h *handler) DeleteFlag(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "flag not found"})
 	}
 
-	h.db.NewDelete().TableExpr("flag_environments").Where("flag_id = ?", flag.ID).Exec(ctx)
+	_, _ = h.db.NewDelete().TableExpr("flag_environments").Where("flag_id = ?", flag.ID).Exec(ctx)
 
 	if _, err := h.db.NewDelete().Model(&flag).Where("id = ?", flag.ID).Exec(ctx); err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "failed to delete flag"})

@@ -1,6 +1,5 @@
 <template>
   <div class="flex h-screen overflow-hidden bg-background">
-
     <!-- Desktop sidebar: always visible on lg+ -->
     <aside class="hidden lg:flex w-56 flex-none flex-col border-r bg-sidebar">
       <SidebarNav />
@@ -8,7 +7,6 @@
 
     <!-- Right side: mobile top bar + scrollable content -->
     <div class="flex flex-1 flex-col overflow-hidden">
-
       <!-- Mobile top bar -->
       <div class="flex h-12 shrink-0 items-center gap-3 border-b bg-background px-4 lg:hidden">
         <button
@@ -27,7 +25,6 @@
       <main class="flex-1 overflow-y-auto">
         <RouterView />
       </main>
-
     </div>
 
     <!-- Mobile drawer backdrop -->
@@ -58,7 +55,6 @@
         <SidebarNav @navigate="drawerOpen = false" />
       </aside>
     </Transition>
-
   </div>
 </template>
 

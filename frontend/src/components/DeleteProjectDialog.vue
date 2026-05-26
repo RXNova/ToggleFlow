@@ -3,12 +3,16 @@
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <div class="flex items-center gap-3">
-          <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-destructive/10">
+          <div
+            class="flex size-9 shrink-0 items-center justify-center rounded-full bg-destructive/10"
+          >
             <TriangleAlert class="size-4 text-destructive" />
           </div>
           <div>
             <DialogTitle>{{ $t('projects.deleteTitle') }}</DialogTitle>
-            <DialogDescription class="mt-0.5">{{ $t('projects.deleteSubtitle') }}</DialogDescription>
+            <DialogDescription class="mt-0.5">{{
+              $t('projects.deleteSubtitle')
+            }}</DialogDescription>
           </div>
         </div>
       </DialogHeader>
@@ -20,7 +24,9 @@
           {{ $t('projects.deleteWarningEnd') }}
         </p>
 
-        <div class="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-xs text-destructive">
+        <div
+          class="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-xs text-destructive"
+        >
           {{ $t('projects.deleteConsequences') }}
         </div>
 
@@ -65,7 +71,14 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { TriangleAlert, AlertCircle, Loader2 } from '@lucide/vue'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -82,9 +95,15 @@ const confirmation = ref('')
 const loading = ref(false)
 const error = ref('')
 
-watch(() => props.open, (v) => {
-  if (v) { confirmation.value = ''; error.value = '' }
-})
+watch(
+  () => props.open,
+  (v) => {
+    if (v) {
+      confirmation.value = ''
+      error.value = ''
+    }
+  }
+)
 
 async function submit() {
   if (!props.project || confirmation.value !== props.project.name) return

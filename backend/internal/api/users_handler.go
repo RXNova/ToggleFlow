@@ -6,6 +6,7 @@ import (
 
 	"toggleflow/internal/auth"
 	"toggleflow/internal/db"
+
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -67,8 +68,8 @@ func (h *handler) CreateUser(c *fiber.Ctx) error {
 }
 
 type updateUserRequest struct {
-	Name  string  `json:"name"`
-	Role  db.Role `json:"role"`
+	Name string  `json:"name"`
+	Role db.Role `json:"role"`
 }
 
 // UpdateUser updates a user's name or role. Superuser-only for role changes.

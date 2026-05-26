@@ -17,19 +17,20 @@
       <Loader2 class="size-6 animate-spin text-muted-foreground/40" />
     </div>
 
-    <div v-else-if="total === 0" class="flex flex-col items-center justify-center py-24 text-center">
+    <div
+      v-else-if="total === 0"
+      class="flex flex-col items-center justify-center py-24 text-center"
+    >
       <FolderOpen class="size-8 text-muted-foreground/30 mb-3" />
       <p class="text-sm font-medium">{{ $t('projects.emptyTitle') }}</p>
-      <p class="mt-1 text-xs text-muted-foreground max-w-xs">{{ $t('projects.emptyDescription') }}</p>
+      <p class="mt-1 text-xs text-muted-foreground max-w-xs">
+        {{ $t('projects.emptyDescription') }}
+      </p>
     </div>
 
     <template v-else>
       <div class="space-y-2">
-        <div
-          v-for="project in projects"
-          :key="project.id"
-          class="rounded-lg border bg-card p-4"
-        >
+        <div v-for="project in projects" :key="project.id" class="rounded-lg border bg-card p-4">
           <div class="flex items-center justify-between gap-4">
             <div class="min-w-0 flex-1">
               <p class="text-sm font-medium">{{ project.name }}</p>
@@ -59,7 +60,11 @@
 
   <CreateProjectDialog v-model:open="createDialogOpen" @created="onCreated" />
   <EditProjectDialog v-model:open="editDialogOpen" :project="editTarget" @updated="onUpdated" />
-  <DeleteProjectDialog v-model:open="deleteDialogOpen" :project="deleteTarget" @deleted="onDeleted" />
+  <DeleteProjectDialog
+    v-model:open="deleteDialogOpen"
+    :project="deleteTarget"
+    @deleted="onDeleted"
+  />
 </template>
 
 <script setup lang="ts">
@@ -91,7 +96,10 @@ const deleteTarget = ref<Project | null>(null)
 async function load() {
   loading.value = true
   try {
-    const res = await projectsApi.list({ limit: limit.value, offset: (page.value - 1) * limit.value })
+    const res = await projectsApi.list({
+      limit: limit.value,
+      offset: (page.value - 1) * limit.value,
+    })
     projects.value = res.data
     total.value = res.total
   } finally {
@@ -125,14 +133,14 @@ function onCreated(project: Project) {
 }
 
 function onUpdated(updated: Project) {
-  const si = projectStore.projects.findIndex(p => p.id === updated.id)
+  const si = projectStore.projects.findIndex((p) => p.id === updated.id)
   if (si !== -1) projectStore.projects[si] = updated
   if (projectStore.current?.id === updated.id) projectStore.setCurrent(updated)
   load()
 }
 
 function onDeleted(project: Project) {
-  const remaining = projectStore.projects.filter(p => p.id !== project.id)
+  const remaining = projectStore.projects.filter((p) => p.id !== project.id)
   projectStore.setProjects(remaining)
   if (page.value > 1 && projects.value.length === 1) page.value--
   load()

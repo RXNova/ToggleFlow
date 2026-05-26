@@ -9,7 +9,9 @@
   <div class="border-b px-2 py-2 shrink-0">
     <DropdownMenu>
       <DropdownMenuTrigger as-child>
-        <button class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-sidebar-accent">
+        <button
+          class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-sidebar-accent"
+        >
           <div class="flex-1 min-w-0">
             <p class="truncate font-medium text-sidebar-foreground text-xs">
               {{ projectStore.current?.name ?? $t('projects.select') }}
@@ -44,9 +46,11 @@
       v-for="item in navItems"
       :key="item.to"
       class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
-      :class="isActive(item.to)
-        ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-        : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'"
+      :class="
+        isActive(item.to)
+          ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+          : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+      "
       @click="navigate(item.to)"
     >
       <component :is="item.icon" class="size-4 shrink-0" />
@@ -58,9 +62,11 @@
   <div class="border-t p-2 space-y-0.5 shrink-0">
     <button
       class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors"
-      :class="isActive('/settings')
-        ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-        : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'"
+      :class="
+        isActive('/settings')
+          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+          : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+      "
       @click="navigate('/settings')"
     >
       <div class="flex-1 min-w-0">
@@ -78,20 +84,32 @@
     </button>
   </div>
 
-  <CreateProjectDialog
-    v-model:open="createDialogOpen"
-    @created="onProjectCreated"
-  />
+  <CreateProjectDialog v-model:open="createDialogOpen" @created="onProjectCreated" />
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ToggleRight, Flag, FolderOpen, Globe, ClipboardList, Users, LogOut, Settings, ChevronsUpDown, Check, Plus } from '@lucide/vue'
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuSeparator, DropdownMenuTrigger,
+  ToggleRight,
+  Flag,
+  FolderOpen,
+  Globe,
+  ClipboardList,
+  Users,
+  LogOut,
+  Settings,
+  ChevronsUpDown,
+  Check,
+  Plus,
+} from '@lucide/vue'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import CreateProjectDialog from '@/components/CreateProjectDialog.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -109,10 +127,10 @@ const createDialogOpen = ref(false)
 
 const navItems = computed(() => {
   const items = [
-    { to: '/projects',     icon: FolderOpen,   label: t('nav.projects') },
-    { to: '/flags',        icon: Flag,         label: t('nav.flags') },
-    { to: '/environments', icon: Globe,         label: t('nav.environments') },
-    { to: '/audit',        icon: ClipboardList, label: t('nav.audit') },
+    { to: '/projects', icon: FolderOpen, label: t('nav.projects') },
+    { to: '/flags', icon: Flag, label: t('nav.flags') },
+    { to: '/environments', icon: Globe, label: t('nav.environments') },
+    { to: '/audit', icon: ClipboardList, label: t('nav.audit') },
   ]
   if (authStore.isAdmin) {
     items.push({ to: '/users', icon: Users, label: t('nav.users') })

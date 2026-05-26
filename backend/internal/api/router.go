@@ -3,6 +3,7 @@ package api
 import (
 	"toggleflow/internal/auth"
 	"toggleflow/internal/db"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/uptrace/bun"
 )

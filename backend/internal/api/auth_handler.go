@@ -4,10 +4,11 @@ import (
 	"context"
 	"time"
 
-	"toggleflow/internal/auth"
-	"toggleflow/internal/db"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
+
+	"toggleflow/internal/auth"
+	"toggleflow/internal/db"
 )
 
 // SetupStatus returns whether the system has been initialized.

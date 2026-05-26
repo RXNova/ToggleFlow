@@ -4,7 +4,9 @@
       <div class="flex flex-col items-center justify-center py-24 text-center">
         <FolderOpen class="size-8 text-muted-foreground/30 mb-3" />
         <p class="text-sm font-medium">{{ $t('projects.noProject') }}</p>
-        <p class="mt-1 text-xs text-muted-foreground max-w-xs">{{ $t('projects.noProjectDescription') }}</p>
+        <p class="mt-1 text-xs text-muted-foreground max-w-xs">
+          {{ $t('projects.noProjectDescription') }}
+        </p>
       </div>
     </template>
 
@@ -26,28 +28,33 @@
         <Loader2 class="size-6 animate-spin text-muted-foreground/40" />
       </div>
 
-      <div v-else-if="flags.length === 0" class="flex flex-col items-center justify-center py-24 text-center">
+      <div
+        v-else-if="flags.length === 0"
+        class="flex flex-col items-center justify-center py-24 text-center"
+      >
         <FlagIcon class="size-8 text-muted-foreground/30 mb-3" />
         <p class="text-sm font-medium">{{ $t('flags.emptyTitle') }}</p>
-        <p class="mt-1 text-xs text-muted-foreground max-w-xs">{{ $t('flags.emptyDescription') }}</p>
+        <p class="mt-1 text-xs text-muted-foreground max-w-xs">
+          {{ $t('flags.emptyDescription') }}
+        </p>
       </div>
 
       <div v-else class="space-y-2">
-        <div
-          v-for="flag in flags"
-          :key="flag.id"
-          class="rounded-lg border bg-card p-4"
-        >
+        <div v-for="flag in flags" :key="flag.id" class="rounded-lg border bg-card p-4">
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2">
                 <p class="text-sm font-medium">{{ flag.name }}</p>
-                <span class="rounded border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                <span
+                  class="rounded border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+                >
                   {{ flag.flag_type }}
                 </span>
               </div>
               <p class="text-xs font-mono text-muted-foreground mt-0.5">{{ flag.key }}</p>
-              <p v-if="flag.description" class="text-xs text-muted-foreground mt-1">{{ flag.description }}</p>
+              <p v-if="flag.description" class="text-xs text-muted-foreground mt-1">
+                {{ flag.description }}
+              </p>
 
               <!-- Variation chips -->
               <div v-if="flag.variations.length" class="mt-2 flex flex-wrap gap-1">
@@ -56,7 +63,8 @@
                   :key="i"
                   class="rounded border bg-muted/40 px-1.5 py-0.5 text-[10px] font-mono"
                 >
-                  {{ v.name }}: <span class="text-muted-foreground">{{ formatValue(v.value) }}</span>
+                  {{ v.name }}:
+                  <span class="text-muted-foreground">{{ formatValue(v.value) }}</span>
                 </span>
               </div>
             </div>
@@ -155,7 +163,13 @@ async function toggle(flag: Flag, env: FlagEnvState) {
   const prev = env.enabled
   env.enabled = !prev
   try {
-    await flagsApi.toggle(projectStore.current.id, flag.key, env.environment_id, env.enabled, env.default_variation)
+    await flagsApi.toggle(
+      projectStore.current.id,
+      flag.key,
+      env.environment_id,
+      env.enabled,
+      env.default_variation
+    )
   } catch {
     env.enabled = prev
   } finally {
@@ -168,7 +182,7 @@ async function deleteFlag(flag: Flag) {
   if (!confirm(`Delete flag "${flag.name}"?`)) return
   try {
     await flagsApi.delete(projectStore.current.id, flag.key)
-    flags.value = flags.value.filter(f => f.id !== flag.id)
+    flags.value = flags.value.filter((f) => f.id !== flag.id)
   } catch {
     // ignore
   }

@@ -1,3 +1,7 @@
+# Root deps (husky + lint-staged)
+node_modules/
+pnpm-lock.yaml
+
 # Claude
 CLAUDE.md
 

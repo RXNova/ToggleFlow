@@ -7,9 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"toggleflow/internal/db"
 	"github.com/gofiber/fiber/v2"
 	"github.com/uptrace/bun"
+
+	"toggleflow/internal/db"
 )
 
 func (h *handler) ListProjects(c *fiber.Ctx) error {
@@ -120,17 +121,17 @@ func (h *handler) DeleteProject(c *fiber.Ctx) error {
 
 	// Cascade: delete flags and their environment states, then environments, then audit entries
 	var flags []db.Flag
-	h.db.NewSelect().Model(&flags).Column("id").Where("project_id = ?", pid).Scan(ctx)
+	_ = h.db.NewSelect().Model(&flags).Column("id").Where("project_id = ?", pid).Scan(ctx)
 	if len(flags) > 0 {
 		flagIDs := make([]int64, len(flags))
 		for i, f := range flags {
 			flagIDs[i] = f.ID
 		}
-		h.db.NewDelete().TableExpr("flag_environments").Where("flag_id IN (?)", bun.In(flagIDs)).Exec(ctx)
+		_, _ = h.db.NewDelete().TableExpr("flag_environments").Where("flag_id IN (?)", bun.In(flagIDs)).Exec(ctx)
 	}
-	h.db.NewDelete().TableExpr("flags").Where("project_id = ?", pid).Exec(ctx)
-	h.db.NewDelete().TableExpr("environments").Where("project_id = ?", pid).Exec(ctx)
-	h.db.NewDelete().TableExpr("audit_entries").Where("project_id = ?", pid).Exec(ctx)
+	_, _ = h.db.NewDelete().TableExpr("flags").Where("project_id = ?", pid).Exec(ctx)
+	_, _ = h.db.NewDelete().TableExpr("environments").Where("project_id = ?", pid).Exec(ctx)
+	_, _ = h.db.NewDelete().TableExpr("audit_entries").Where("project_id = ?", pid).Exec(ctx)
 
 	if _, err := h.db.NewDelete().TableExpr("projects").Where("id = ?", pid).Exec(ctx); err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "failed to delete project"})

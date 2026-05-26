@@ -9,7 +9,9 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value)
   const isSuperuser = computed(() => user.value?.role === 'superuser')
   const isAdmin = computed(() => ['superuser', 'admin'].includes(user.value?.role ?? ''))
-  const canEdit = computed(() => ['superuser', 'admin', 'owner', 'editor'].includes(user.value?.role ?? ''))
+  const canEdit = computed(() =>
+    ['superuser', 'admin', 'owner', 'editor'].includes(user.value?.role ?? '')
+  )
 
   function setAuth(newToken: string, newUser: User) {
     token.value = newToken

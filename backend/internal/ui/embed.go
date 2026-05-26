@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 )
 
-// go:embed bundles the built Vue dist/ into the binary at compile time.
+// Vue dist/ is embedded into the binary at compile time via the directive below.
 // In dev, this folder is empty — Vite serves the frontend at :5173 instead.
 //
 //go:embed dist

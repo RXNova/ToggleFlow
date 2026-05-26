@@ -8,7 +8,6 @@
     <Separator />
 
     <div class="max-w-md space-y-6">
-
       <!-- Appearance -->
       <div class="space-y-3">
         <div class="space-y-0.5">
@@ -20,9 +19,11 @@
             v-for="opt in themeOptions"
             :key="opt.value"
             class="flex flex-col items-center gap-2 rounded-lg border p-3 text-xs font-medium transition-colors"
-            :class="themeStore.theme === opt.value
-              ? 'border-primary bg-primary/5 text-primary'
-              : 'border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground'"
+            :class="
+              themeStore.theme === opt.value
+                ? 'border-primary bg-primary/5 text-primary'
+                : 'border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground'
+            "
             @click="themeStore.setTheme(opt.value)"
           >
             <component :is="opt.icon" class="size-4" />
@@ -44,16 +45,17 @@
             v-for="loc in SUPPORTED_LOCALES"
             :key="loc"
             class="flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors"
-            :class="locale === loc
-              ? 'border-primary bg-primary/5 text-primary'
-              : 'border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground'"
+            :class="
+              locale === loc
+                ? 'border-primary bg-primary/5 text-primary'
+                : 'border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground'
+            "
             @click="setLocale(loc)"
           >
             {{ $t(`lang.${loc}`) }}
           </button>
         </div>
       </div>
-
     </div>
   </div>
 </template>
@@ -69,8 +71,8 @@ const { locale } = useI18n()
 const themeStore = useThemeStore()
 
 const themeOptions: { value: Theme; icon: typeof Sun }[] = [
-  { value: 'light',  icon: Sun },
-  { value: 'dark',   icon: Moon },
+  { value: 'light', icon: Sun },
+  { value: 'dark', icon: Moon },
   { value: 'system', icon: Monitor },
 ]
 </script>

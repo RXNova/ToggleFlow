@@ -4,9 +4,7 @@ import type { Project } from '@/api/projects'
 
 export const useProjectStore = defineStore('project', () => {
   const projects = ref<Project[]>([])
-  const current = ref<Project | null>(
-    JSON.parse(localStorage.getItem('currentProject') ?? 'null'),
-  )
+  const current = ref<Project | null>(JSON.parse(localStorage.getItem('currentProject') ?? 'null'))
 
   function setCurrent(project: Project | null) {
     current.value = project

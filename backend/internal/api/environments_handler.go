@@ -8,8 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"toggleflow/internal/db"
 	"github.com/gofiber/fiber/v2"
+
+	"toggleflow/internal/db"
 )
 
 func (h *handler) ListEnvironments(c *fiber.Ctx) error {

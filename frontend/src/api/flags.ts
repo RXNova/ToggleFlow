@@ -31,10 +31,28 @@ export interface Flag {
 export const flagsApi = {
   list: (projectId: number, params?: PageParams) =>
     api.get<PageResult<Flag>>(`/projects/${projectId}/flags`, params),
-  create: (projectId: number, data: { name: string; key: string; description?: string; flag_type: FlagType; variations: Variation[] }) =>
-    api.post<Flag>(`/projects/${projectId}/flags`, data),
-  toggle: (projectId: number, flagKey: string, environmentId: number, enabled: boolean, defaultVariation: number) =>
-    api.patch<{ ok: boolean }>(`/projects/${projectId}/flags/${flagKey}`, { environment_id: environmentId, enabled, default_variation: defaultVariation }),
+  create: (
+    projectId: number,
+    data: {
+      name: string
+      key: string
+      description?: string
+      flag_type: FlagType
+      variations: Variation[]
+    }
+  ) => api.post<Flag>(`/projects/${projectId}/flags`, data),
+  toggle: (
+    projectId: number,
+    flagKey: string,
+    environmentId: number,
+    enabled: boolean,
+    defaultVariation: number
+  ) =>
+    api.patch<{ ok: boolean }>(`/projects/${projectId}/flags/${flagKey}`, {
+      environment_id: environmentId,
+      enabled,
+      default_variation: defaultVariation,
+    }),
   delete: (projectId: number, flagKey: string) =>
     api.delete<void>(`/projects/${projectId}/flags/${flagKey}`),
 }
