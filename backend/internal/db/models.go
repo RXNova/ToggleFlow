@@ -35,20 +35,21 @@ type Flag struct {
 	Key         string    `bun:"key,notnull"                                  json:"key"`
 	Name        string    `bun:"name,notnull"                                 json:"name"`
 	Description string    `bun:"description"                                  json:"description"`
+	FlagType    string    `bun:"flag_type,notnull,default:'boolean'"           json:"flag_type"`
+	Variations  string    `bun:"variations,type:text,notnull,default:'[]'"    json:"-"`
 	CreatedAt   time.Time `bun:"created_at,notnull,default:current_timestamp" json:"created_at"`
 	UpdatedAt   time.Time `bun:"updated_at,notnull,default:current_timestamp" json:"updated_at"`
 }
 
-// FlagEnvironment holds per-environment state for a flag — enabled, variations, targeting rules.
-// Variations and Rules are stored as JSON strings (Go has no native JSON column type).
+// FlagEnvironment holds per-environment state for a flag.
+// Rules are stored as a JSON string — Go has no native JSON column type.
 type FlagEnvironment struct {
 	bun.BaseModel `bun:"table:flag_environments"`
-	ID               int64  `bun:"id,pk,autoincrement"          json:"id"`
-	FlagID           int64  `bun:"flag_id,notnull"              json:"flag_id"`
-	EnvironmentID    int64  `bun:"environment_id,notnull"       json:"environment_id"`
-	Enabled          bool   `bun:"enabled,notnull,default:false" json:"enabled"`
-	Variations       string `bun:"variations,type:text"         json:"variations"`
-	Rules            string `bun:"rules,type:text"              json:"rules"`
+	ID               int64  `bun:"id,pk,autoincrement"                 json:"id"`
+	FlagID           int64  `bun:"flag_id,notnull"                     json:"flag_id"`
+	EnvironmentID    int64  `bun:"environment_id,notnull"              json:"environment_id"`
+	Enabled          bool   `bun:"enabled,notnull,default:false"       json:"enabled"`
+	Rules            string `bun:"rules,type:text"                     json:"rules"`
 	DefaultVariation int    `bun:"default_variation,notnull,default:0" json:"default_variation"`
 }
 

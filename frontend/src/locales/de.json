@@ -61,8 +61,29 @@
     "title": "Feature-Flags",
     "subtitle": "Feature-Flags in allen Umgebungen verwalten",
     "create": "Flag erstellen",
+    "creating": "Wird erstellt...",
+    "createTitle": "Flag erstellen",
+    "createDescription": "Flags werden pro Umgebung ausgewertet. Variationen definieren die möglichen Werte.",
     "emptyTitle": "Noch keine Feature-Flags",
-    "emptyDescription": "Erstellen Sie Ihren ersten Flag, um Funktionen schrittweise bereitzustellen."
+    "emptyDescription": "Erstellen Sie Ihren ersten Flag, um Funktionen schrittweise bereitzustellen.",
+    "noEnvironments": "Keine Umgebungen — erstellen Sie eine, um diesen Flag zu aktivieren.",
+    "name": "Name",
+    "namePlaceholder": "Meine Funktion",
+    "key": "Schlüssel",
+    "keyPlaceholder": "meine-funktion",
+    "description": "Beschreibung",
+    "descriptionPlaceholder": "Was steuert dieser Flag?",
+    "flagType": "Typ",
+    "variations": "Variationen",
+    "variationName": "Name",
+    "variationValue": "Wert",
+    "addVariation": "Variation hinzufügen",
+    "types": {
+      "boolean": "Boolean",
+      "string": "String",
+      "number": "Zahl",
+      "json": "JSON"
+    }
   },
   "environments": {
     "title": "Umgebungen",

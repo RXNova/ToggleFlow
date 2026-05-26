@@ -61,8 +61,29 @@
     "title": "Feature Flags",
     "subtitle": "Manage flags across all environments",
     "create": "Create flag",
+    "creating": "Creating...",
+    "createTitle": "Create flag",
+    "createDescription": "Flags are evaluated per environment. Variations define the possible values.",
     "emptyTitle": "No feature flags yet",
-    "emptyDescription": "Create your first flag to start rolling out features gradually."
+    "emptyDescription": "Create your first flag to start rolling out features gradually.",
+    "noEnvironments": "No environments — create one to enable this flag.",
+    "name": "Name",
+    "namePlaceholder": "My feature",
+    "key": "Key",
+    "keyPlaceholder": "my-feature",
+    "description": "Description",
+    "descriptionPlaceholder": "What does this flag control?",
+    "flagType": "Type",
+    "variations": "Variations",
+    "variationName": "Name",
+    "variationValue": "Value",
+    "addVariation": "Add variation",
+    "types": {
+      "boolean": "Boolean",
+      "string": "String",
+      "number": "Number",
+      "json": "JSON"
+    }
   },
   "environments": {
     "title": "Environments",

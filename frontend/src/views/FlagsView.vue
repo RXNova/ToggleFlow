@@ -22,19 +22,16 @@
 
       <Separator />
 
-      <!-- Loading -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-24">
         <Loader2 class="size-6 animate-spin text-muted-foreground/40" />
       </div>
 
-      <!-- Empty -->
       <div v-else-if="flags.length === 0" class="flex flex-col items-center justify-center py-24 text-center">
-        <Flag class="size-8 text-muted-foreground/30 mb-3" />
+        <FlagIcon class="size-8 text-muted-foreground/30 mb-3" />
         <p class="text-sm font-medium">{{ $t('flags.emptyTitle') }}</p>
         <p class="mt-1 text-xs text-muted-foreground max-w-xs">{{ $t('flags.emptyDescription') }}</p>
       </div>
 
-      <!-- List -->
       <div v-else class="space-y-2">
         <div
           v-for="flag in flags"
@@ -43,10 +40,27 @@
         >
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium">{{ flag.name }}</p>
+              <div class="flex items-center gap-2">
+                <p class="text-sm font-medium">{{ flag.name }}</p>
+                <span class="rounded border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                  {{ flag.flag_type }}
+                </span>
+              </div>
               <p class="text-xs font-mono text-muted-foreground mt-0.5">{{ flag.key }}</p>
               <p v-if="flag.description" class="text-xs text-muted-foreground mt-1">{{ flag.description }}</p>
+
+              <!-- Variation chips -->
+              <div v-if="flag.variations.length" class="mt-2 flex flex-wrap gap-1">
+                <span
+                  v-for="(v, i) in flag.variations"
+                  :key="i"
+                  class="rounded border bg-muted/40 px-1.5 py-0.5 text-[10px] font-mono"
+                >
+                  {{ v.name }}: <span class="text-muted-foreground">{{ formatValue(v.value) }}</span>
+                </span>
+              </div>
             </div>
+
             <button
               class="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
               @click="deleteFlag(flag)"
@@ -94,21 +108,28 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Flag, Plus, FolderOpen, Loader2, Trash2 } from '@lucide/vue'
+import { Flag as FlagIcon, Plus, FolderOpen, Loader2, Trash2 } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useProjectStore } from '@/stores/project'
-import { flagsApi, type Flag as FlagType, type FlagEnvState } from '@/api/flags'
+import { flagsApi, type Flag, type FlagEnvState } from '@/api/flags'
 import CreateFlagDialog from '@/components/CreateFlagDialog.vue'
 
 const projectStore = useProjectStore()
-const flags = ref<FlagType[]>([])
+const flags = ref<Flag[]>([])
 const loading = ref(false)
 const createDialogOpen = ref(false)
 const toggling = ref<Record<string, boolean>>({})
 
 function toggleKey(flagId: number, envId: number) {
   return `${flagId}:${envId}`
+}
+
+function formatValue(value: unknown): string {
+  if (typeof value === 'boolean') return String(value)
+  if (typeof value === 'string') return value === '' ? '""' : `"${value}"`
+  if (typeof value === 'object') return JSON.stringify(value)
+  return String(value)
 }
 
 async function load() {
@@ -123,19 +144,18 @@ async function load() {
 
 watch(() => projectStore.current, load, { immediate: true })
 
-function onCreated(flag: FlagType) {
-  flags.value.push(flag)
-  load() // reload to get environment states
+function onCreated() {
+  load()
 }
 
-async function toggle(flag: FlagType, env: FlagEnvState) {
+async function toggle(flag: Flag, env: FlagEnvState) {
   if (!projectStore.current) return
   const k = toggleKey(flag.id, env.environment_id)
   toggling.value[k] = true
   const prev = env.enabled
   env.enabled = !prev
   try {
-    await flagsApi.toggle(projectStore.current.id, flag.key, env.environment_id, env.enabled)
+    await flagsApi.toggle(projectStore.current.id, flag.key, env.environment_id, env.enabled, env.default_variation)
   } catch {
     env.enabled = prev
   } finally {
@@ -143,7 +163,7 @@ async function toggle(flag: FlagType, env: FlagEnvState) {
   }
 }
 
-async function deleteFlag(flag: FlagType) {
+async function deleteFlag(flag: Flag) {
   if (!projectStore.current) return
   if (!confirm(`Delete flag "${flag.name}"?`)) return
   try {
