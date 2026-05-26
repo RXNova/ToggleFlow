@@ -79,7 +79,7 @@ func (h *handler) ListFlags(c *fiber.Ctx) error {
 	}
 	ctx := context.Background()
 
-	var flags []db.Flag
+	flags := make([]db.Flag, 0)
 	if err := h.db.NewSelect().Model(&flags).Where("project_id = ?", pid).OrderExpr("created_at ASC").Scan(ctx); err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "failed to fetch flags"})
 	}

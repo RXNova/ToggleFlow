@@ -18,7 +18,7 @@ func (h *handler) ListEnvironments(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid project id"})
 	}
 
-	var envs []db.Environment
+	envs := make([]db.Environment, 0)
 	if err := h.db.NewSelect().Model(&envs).Where("project_id = ?", pid).OrderExpr("created_at ASC").Scan(context.Background()); err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "failed to fetch environments"})
 	}

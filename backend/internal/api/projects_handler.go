@@ -11,7 +11,7 @@ import (
 )
 
 func (h *handler) ListProjects(c *fiber.Ctx) error {
-	var projects []db.Project
+	projects := make([]db.Project, 0)
 	err := h.db.NewSelect().Model(&projects).OrderExpr("created_at ASC").Scan(context.Background())
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "failed to fetch projects"})
