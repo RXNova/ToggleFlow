@@ -11,6 +11,7 @@ export interface FlagEnvState {
   environment_id: number
   environment_name: string
   environment_key: string
+  protected: boolean
   enabled: boolean
   default_variation: number
 }

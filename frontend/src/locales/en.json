@@ -120,7 +120,11 @@
     "emptyTitle": "No environments yet",
     "emptyDescription": "Environments let you control flag states independently across dev, staging, and prod.",
     "sdkKey": "SDK Key",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "protected": "Protected",
+    "protectedLabel": "Protected environment",
+    "protectedDescription": "Only admins can toggle flags in this environment.",
+    "protectedNote": "Protected — only admins can change flag states"
   },
   "audit": {
     "title": "Audit Log",

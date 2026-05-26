@@ -41,6 +41,26 @@
           />
         </div>
 
+        <div class="flex items-center justify-between rounded-md border px-3 py-2.5">
+          <div>
+            <p class="text-sm font-medium">{{ $t('environments.protectedLabel') }}</p>
+            <p class="text-xs text-muted-foreground">
+              {{ $t('environments.protectedDescription') }}
+            </p>
+          </div>
+          <button
+            type="button"
+            class="relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none"
+            :class="isProtected ? 'bg-primary' : 'bg-input'"
+            @click="isProtected = !isProtected"
+          >
+            <span
+              class="pointer-events-none block h-3.5 w-3.5 rounded-full bg-background shadow-sm ring-0 transition-transform"
+              :class="isProtected ? 'translate-x-3' : 'translate-x-0'"
+            />
+          </button>
+        </div>
+
         <Alert v-if="error" variant="destructive">
           <AlertCircle class="size-4" />
           <AlertDescription>{{ error }}</AlertDescription>
@@ -87,6 +107,7 @@ const name = ref('')
 const keyRaw = ref('')
 const keyTouched = ref(false)
 const description = ref('')
+const isProtected = ref(false)
 const loading = ref(false)
 const error = ref('')
 
@@ -116,6 +137,7 @@ watch(
       keyRaw.value = props.environment.key
       keyTouched.value = false
       description.value = props.environment.description
+      isProtected.value = props.environment.protected
       error.value = ''
     }
   }
@@ -131,7 +153,8 @@ async function submit() {
       props.environment.id,
       name.value,
       key.value,
-      description.value
+      description.value,
+      isProtected.value
     )
     emit('updated', updated)
     emit('update:open', false)

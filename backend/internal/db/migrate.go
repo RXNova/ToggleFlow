@@ -49,6 +49,7 @@ func Migrate(db *bun.DB) error {
 		`ALTER TABLE users ADD COLUMN uuid TEXT NOT NULL DEFAULT ''`,
 		`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_uuid ON users (uuid) WHERE uuid != ''`,
 		// Backfill: grant all existing users access to all existing projects so no one loses access on upgrade.
+		`ALTER TABLE environments ADD COLUMN protected INTEGER NOT NULL DEFAULT 0`,
 		`INSERT OR IGNORE INTO project_members (project_id, user_id, created_at) SELECT p.id, u.id, CURRENT_TIMESTAMP FROM projects p CROSS JOIN users u`,
 	} {
 		_, _ = db.ExecContext(ctx, stmt)

@@ -27,6 +27,7 @@ type Environment struct {
 	Name          string    `bun:"name,notnull"                                 json:"name"`
 	Key           string    `bun:"key,notnull"                                  json:"key"`
 	Description   string    `bun:"description,notnull,default:''"               json:"description"`
+	Protected     bool      `bun:"protected,notnull,default:false"              json:"protected"`
 	SDKKey        string    `bun:"sdk_key,notnull,unique"                       json:"sdk_key"`
 	CreatedAt     time.Time `bun:"created_at,notnull,default:current_timestamp" json:"created_at"`
 	UpdatedAt     time.Time `bun:"updated_at,notnull,default:current_timestamp" json:"updated_at"`

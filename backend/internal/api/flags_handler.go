@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/uptrace/bun"
 
+	"toggleflow/internal/auth"
 	"toggleflow/internal/db"
 )
 
@@ -31,6 +32,7 @@ type FlagEnvState struct {
 	EnvironmentID    int64  `json:"environment_id"`
 	EnvironmentName  string `json:"environment_name"`
 	EnvironmentKey   string `json:"environment_key"`
+	Protected        bool   `json:"protected"`
 	Enabled          bool   `json:"enabled"`
 	DefaultVariation int    `json:"default_variation"`
 }
@@ -133,6 +135,7 @@ func (h *handler) ListFlags(c *fiber.Ctx) error {
 					EnvironmentID:    env.ID,
 					EnvironmentName:  env.Name,
 					EnvironmentKey:   env.Key,
+					Protected:        env.Protected,
 					Enabled:          s.enabled,
 					DefaultVariation: s.defaultVariation,
 				}
@@ -317,6 +320,17 @@ func (h *handler) ToggleFlagEnv(c *fiber.Ctx) error {
 	var req toggleFlagRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid body"})
+	}
+
+	var env db.Environment
+	if err := h.db.NewSelect().Model(&env).Where("id = ?", req.EnvironmentID).Scan(ctx); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "environment not found"})
+	}
+	if env.Protected {
+		claims := auth.GetClaims(c)
+		if db.RoleRank(claims.Role) < db.RoleRank(db.RoleAdmin) {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "this environment is protected — only admins can change flag states"})
+		}
 	}
 
 	var fe db.FlagEnvironment

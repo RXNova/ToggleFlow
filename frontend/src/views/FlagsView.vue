@@ -126,9 +126,15 @@
                   class="flex items-center gap-2"
                 >
                   <button
-                    class="relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none disabled:pointer-events-none"
-                    :class="env.enabled ? 'bg-primary' : 'bg-input'"
-                    :disabled="toggling[toggleKey(flag.id, env.environment_id)]"
+                    class="relative inline-flex h-4.5 w-8 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+                    :class="[
+                      env.enabled ? 'bg-primary' : 'bg-input',
+                      env.protected && !authStore.isAdmin ? 'cursor-not-allowed' : 'cursor-pointer',
+                    ]"
+                    :disabled="
+                      toggling[toggleKey(flag.id, env.environment_id)] ||
+                      (env.protected && !authStore.isAdmin)
+                    "
                     @click="toggle(flag, env)"
                   >
                     <span
@@ -136,12 +142,21 @@
                       :class="env.enabled ? 'translate-x-3' : 'translate-x-0'"
                     />
                   </button>
-                  <span class="text-xs text-muted-foreground">{{ env.environment_name }}</span>
+                  <span class="text-xs text-muted-foreground flex items-center gap-1">
+                    {{ env.environment_name }}
+                    <Tooltip
+                      v-if="env.protected && !authStore.isAdmin"
+                      :text="$t('environments.protectedNote')"
+                    >
+                      <Lock class="size-3 text-orange-500/70" />
+                    </Tooltip>
+                  </span>
                   <!-- Default variation selector -->
                   <select
                     v-if="flag.variations.length > 1"
                     :value="env.default_variation"
-                    class="rounded border border-input bg-background px-1.5 py-0.5 text-[11px] text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    :disabled="env.protected && !authStore.isAdmin"
+                    class="rounded border border-input bg-background px-1.5 py-0.5 text-[11px] text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
                     @change="changeDefaultVariation(flag, env, $event)"
                   >
                     <option v-for="(v, i) in flag.variations" :key="i" :value="i">
@@ -214,6 +229,7 @@ import {
   SearchX,
   CalendarDays,
   Clock,
+  Lock,
 } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -221,6 +237,7 @@ import { Separator } from '@/components/ui/separator'
 import Pagination from '@/components/ui/pagination/Pagination.vue'
 import { useProjectStore } from '@/stores/project'
 import { flagsApi, type Flag, type FlagEnvState } from '@/api/flags'
+import { useAuthStore } from '@/stores/auth'
 import { timeAgo } from '@/lib/utils'
 import CreateFlagDialog from '@/components/CreateFlagDialog.vue'
 import EditFlagDialog from '@/components/EditFlagDialog.vue'
@@ -230,6 +247,7 @@ import { Tooltip } from '@/components/ui/tooltip'
 const LIMIT = 20
 
 const projectStore = useProjectStore()
+const authStore = useAuthStore()
 const flags = ref<Flag[]>([])
 const total = ref(0)
 const page = ref(1)

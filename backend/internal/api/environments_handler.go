@@ -47,6 +47,7 @@ type createEnvironmentRequest struct {
 	Name        string `json:"name"`
 	Key         string `json:"key"`
 	Description string `json:"description"`
+	Protected   bool   `json:"protected"`
 }
 
 func (h *handler) CreateEnvironment(c *fiber.Ctx) error {
@@ -81,6 +82,7 @@ func (h *handler) CreateEnvironment(c *fiber.Ctx) error {
 		Name:        req.Name,
 		Key:         key,
 		Description: req.Description,
+		Protected:   req.Protected,
 		SDKKey:      sdkKey,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
@@ -100,6 +102,7 @@ type updateEnvironmentRequest struct {
 	Name        string `json:"name"`
 	Key         string `json:"key"`
 	Description string `json:"description"`
+	Protected   bool   `json:"protected"`
 }
 
 func (h *handler) UpdateEnvironment(c *fiber.Ctx) error {
@@ -132,9 +135,10 @@ func (h *handler) UpdateEnvironment(c *fiber.Ctx) error {
 	env.Name = req.Name
 	env.Key = req.Key
 	env.Description = req.Description
+	env.Protected = req.Protected
 	env.UpdatedAt = time.Now()
 
-	if _, err := h.db.NewUpdate().Model(&env).Column("name", "key", "description", "updated_at").Where("id = ?", eid).Exec(ctx); err != nil {
+	if _, err := h.db.NewUpdate().Model(&env).Column("name", "key", "description", "protected", "updated_at").Where("id = ?", eid).Exec(ctx); err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "failed to update environment"})
 	}
 

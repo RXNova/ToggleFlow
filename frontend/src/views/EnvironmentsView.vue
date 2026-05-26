@@ -60,6 +60,13 @@
                     class="inline-flex items-center rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground"
                     >{{ env.key }}</span
                   >
+                  <span
+                    v-if="env.protected"
+                    class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                  >
+                    <Lock class="size-2.5" />
+                    {{ $t('environments.protected') }}
+                  </span>
                 </div>
                 <p v-if="env.description" class="mt-1 text-xs text-muted-foreground">
                   {{ env.description }}
@@ -130,7 +137,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Globe, Plus, FolderOpen, Loader2, Copy, Check, Pencil, Trash2 } from '@lucide/vue'
+import { Globe, Plus, FolderOpen, Loader2, Copy, Check, Pencil, Trash2, Lock } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useProjectStore } from '@/stores/project'
