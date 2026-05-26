@@ -27,6 +27,7 @@
             placeholder="my-project"
             class="mt-2 font-mono"
             required
+            @focus="slugTouched = true"
           />
         </div>
 
@@ -50,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { AlertCircle, Loader2 } from '@lucide/vue'
 import {
   Dialog,
@@ -73,16 +74,36 @@ const emit = defineEmits<{
 }>()
 
 const name = ref('')
-const slug = ref('')
+const slugRaw = ref('')
+const slugTouched = ref(false)
 const loading = ref(false)
 const error = ref('')
+
+const slug = computed({
+  get: () => slugRaw.value,
+  set: (v: string) => {
+    slugRaw.value = v.toLowerCase().replace(/[^a-z0-9-]/g, '')
+  },
+})
+
+function slugify(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+watch(name, (v: string) => {
+  if (!slugTouched.value) slugRaw.value = slugify(v)
+})
 
 watch(
   () => props.project,
   (p) => {
     if (p) {
       name.value = p.name
-      slug.value = p.slug
+      slugRaw.value = p.slug
+      slugTouched.value = false
       error.value = ''
     }
   },
@@ -91,10 +112,11 @@ watch(
 
 watch(
   () => props.open,
-  (v) => {
+  (v: boolean) => {
     if (v && props.project) {
       name.value = props.project.name
-      slug.value = props.project.slug
+      slugRaw.value = props.project.slug
+      slugTouched.value = false
       error.value = ''
     }
   }

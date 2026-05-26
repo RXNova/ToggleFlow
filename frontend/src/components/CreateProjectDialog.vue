@@ -19,6 +19,18 @@
           />
         </div>
 
+        <div class="space-y-2">
+          <Label for="project-slug">{{ $t('projects.slug') }}</Label>
+          <Input
+            id="project-slug"
+            v-model="slug"
+            placeholder="my-project"
+            class="mt-2 font-mono"
+            required
+            @focus="slugTouched = true"
+          />
+        </div>
+
         <Alert v-if="error" variant="destructive">
           <AlertCircle class="size-4" />
           <AlertDescription>{{ error }}</AlertDescription>
@@ -39,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { AlertCircle, Loader2 } from '@lucide/vue'
 import {
   Dialog,
@@ -62,18 +74,18 @@ const emit = defineEmits<{
 }>()
 
 const name = ref('')
+const slugRaw = ref('')
+const slugTouched = ref(false)
 const loading = ref(false)
 const error = ref('')
 
-watch(
-  () => props.open,
-  (v) => {
-    if (v) {
-      name.value = ''
-      error.value = ''
-    }
-  }
-)
+// Computed setter sanitizes every keystroke: lowercase, a-z 0-9 hyphens only
+const slug = computed({
+  get: () => slugRaw.value,
+  set: (v: string) => {
+    slugRaw.value = v.toLowerCase().replace(/[^a-z0-9-]/g, '')
+  },
+})
 
 function slugify(s: string) {
   return s
@@ -82,11 +94,28 @@ function slugify(s: string) {
     .replace(/^-|-$/g, '')
 }
 
+// Auto-populate slug from name until user touches the slug field
+watch(name, (v: string) => {
+  if (!slugTouched.value) slugRaw.value = slugify(v)
+})
+
+watch(
+  () => props.open,
+  (v: boolean) => {
+    if (v) {
+      name.value = ''
+      slugRaw.value = ''
+      slugTouched.value = false
+      error.value = ''
+    }
+  }
+)
+
 async function submit() {
   error.value = ''
   loading.value = true
   try {
-    const project = await projectsApi.create(name.value, slugify(name.value))
+    const project = await projectsApi.create(name.value, slug.value)
     emit('created', project)
     emit('update:open', false)
   } catch (e: unknown) {
