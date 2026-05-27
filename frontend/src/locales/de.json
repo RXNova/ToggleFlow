@@ -198,7 +198,11 @@
     "selectUser": "Benutzer auswählen...",
     "remove": "Aus Projekt entfernen",
     "emptyTitle": "Noch keine Mitglieder",
-    "emptyDescription": "Fügen Sie Teammitglieder hinzu, um ihnen Zugriff auf die Flags und Umgebungen dieses Projekts zu geben."
+    "emptyDescription": "Fügen Sie Teammitglieder hinzu, um ihnen Zugriff auf die Flags und Umgebungen dieses Projekts zu geben.",
+    "search": "Benutzer suchen...",
+    "ofTotal": "Mitglieder von {total} Benutzern",
+    "adminAccess": "Admins haben immer Zugriff, unabhängig von der Mitgliedschaft",
+    "noResults": "Keine Benutzer gefunden"
   },
   "settings": {
     "title": "Einstellungen",

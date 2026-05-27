@@ -128,7 +128,11 @@ async function submit() {
   error.value = ''
   loading.value = true
   try {
-    const updated = await usersApi.update(props.user.id, name.value, email.value, role.value)
+    const updated = await usersApi.update(props.user.id, {
+      name: name.value,
+      email: email.value,
+      role: role.value,
+    })
     emit('updated', updated)
     emit('update:open', false)
   } catch (e: unknown) {

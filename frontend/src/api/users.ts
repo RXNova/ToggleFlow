@@ -29,8 +29,8 @@ export const usersApi = {
   list: () => api.get<User[]>('/users'),
   create: (name: string, email: string, role: Role, expiryDays: number) =>
     api.post<InviteResult>('/users', { name, email, role, expiry_days: expiryDays }),
-  update: (id: number, name: string, email: string, role: Role) =>
-    api.patch<User>(`/users/${id}`, { name, email, role }),
+  update: (id: number, data: Partial<{ name: string; email: string; role: Role }>) =>
+    api.patch<User>(`/users/${id}`, data),
   reinvite: (id: number, expiryDays: number) =>
     api.post<InviteResult>(`/users/${id}/reinvite`, { expiry_days: expiryDays }),
   delete: (id: number) => api.delete<void>(`/users/${id}`),

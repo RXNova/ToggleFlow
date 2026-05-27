@@ -198,7 +198,11 @@
     "selectUser": "Select a user...",
     "remove": "Remove from project",
     "emptyTitle": "No members yet",
-    "emptyDescription": "Add team members to give them access to this project's flags and environments."
+    "emptyDescription": "Add team members to give them access to this project's flags and environments.",
+    "search": "Search users...",
+    "ofTotal": "members of {total} users",
+    "adminAccess": "Admins always have access regardless of membership",
+    "noResults": "No users match your search"
   },
   "settings": {
     "title": "Settings",
