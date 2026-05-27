@@ -31,6 +31,9 @@ func (h *handler) ListAudit(c *fiber.Ctx) error {
 	if resource := c.Query("resource"); resource != "" {
 		q = q.Where("resource = ?", resource)
 	}
+	if actor := c.Query("actor"); actor != "" {
+		q = q.Where("actor = ?", actor)
+	}
 
 	total, err := q.Count(ctx)
 	if err != nil {

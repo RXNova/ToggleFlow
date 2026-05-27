@@ -73,6 +73,14 @@
                 </p>
               </div>
               <div class="flex items-center gap-1 shrink-0">
+                <Tooltip :text="$t('environments.history')">
+                  <button
+                    class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                    @click="openHistory(env)"
+                  >
+                    <History class="size-3.5" />
+                  </button>
+                </Tooltip>
                 <Tooltip :text="$t('common.edit')">
                   <button
                     class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -133,11 +141,30 @@
     :project-id="projectStore.current.id"
     @deleted="onDeleted"
   />
+  <AuditHistorySheet
+    v-if="projectStore.current && historyTarget"
+    v-model:open="historyOpen"
+    :project-id="projectStore.current.id"
+    :resource="historyTarget.key"
+    :title="$t('environments.historyTitle')"
+    :label="historyTarget.key"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Globe, Plus, FolderOpen, Loader2, Copy, Check, Pencil, Trash2, Lock } from '@lucide/vue'
+import {
+  Globe,
+  Plus,
+  FolderOpen,
+  Loader2,
+  Copy,
+  Check,
+  Pencil,
+  Trash2,
+  Lock,
+  History,
+} from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useProjectStore } from '@/stores/project'
@@ -145,6 +172,7 @@ import { environmentsApi, type Environment } from '@/api/environments'
 import CreateEnvironmentDialog from '@/components/CreateEnvironmentDialog.vue'
 import EditEnvironmentDialog from '@/components/EditEnvironmentDialog.vue'
 import DeleteEnvironmentDialog from '@/components/DeleteEnvironmentDialog.vue'
+import AuditHistorySheet from '@/components/AuditHistorySheet.vue'
 import { Tooltip } from '@/components/ui/tooltip'
 
 const projectStore = useProjectStore()
@@ -155,6 +183,8 @@ const editDialogOpen = ref(false)
 const editTarget = ref<Environment | null>(null)
 const deleteDialogOpen = ref(false)
 const deleteTarget = ref<Environment | null>(null)
+const historyOpen = ref(false)
+const historyTarget = ref<Environment | null>(null)
 const copiedId = ref<number | null>(null)
 
 async function load() {
@@ -181,6 +211,11 @@ function openEdit(env: Environment) {
 function openDelete(env: Environment) {
   deleteTarget.value = env
   deleteDialogOpen.value = true
+}
+
+function openHistory(env: Environment) {
+  historyTarget.value = env
+  historyOpen.value = true
 }
 
 function onUpdated(updated: Environment) {

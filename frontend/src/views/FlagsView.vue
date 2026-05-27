@@ -221,11 +221,13 @@
     :project-id="projectStore.current.id"
     @deleted="onDeleted"
   />
-  <FlagHistorySheet
+  <AuditHistorySheet
     v-if="projectStore.current && historyTarget"
     v-model:open="historyOpen"
     :project-id="projectStore.current.id"
-    :flag-key="historyTarget.key"
+    :resource="historyTarget.key"
+    :title="$t('flags.historyTitle')"
+    :label="historyTarget.key"
   />
 </template>
 
@@ -257,7 +259,7 @@ import { timeAgo } from '@/lib/utils'
 import CreateFlagDialog from '@/components/CreateFlagDialog.vue'
 import EditFlagDialog from '@/components/EditFlagDialog.vue'
 import DeleteFlagDialog from '@/components/DeleteFlagDialog.vue'
-import FlagHistorySheet from '@/components/FlagHistorySheet.vue'
+import AuditHistorySheet from '@/components/AuditHistorySheet.vue'
 import { Tooltip } from '@/components/ui/tooltip'
 
 const LIMIT = 20

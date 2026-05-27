@@ -129,7 +129,9 @@
     "protected": "Geschützt",
     "protectedLabel": "Geschützte Umgebung",
     "protectedDescription": "Nur Admins können Flags in dieser Umgebung umschalten.",
-    "protectedNote": "Geschützt — nur Admins können Flag-Zustände ändern"
+    "protectedNote": "Geschützt — nur Admins können Flag-Zustände ändern",
+    "history": "Umgebungsverlauf",
+    "historyTitle": "Umgebungsverlauf"
   },
   "audit": {
     "title": "Audit-Protokoll",

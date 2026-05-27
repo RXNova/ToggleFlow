@@ -129,7 +129,9 @@
     "protected": "Protected",
     "protectedLabel": "Protected environment",
     "protectedDescription": "Only admins can toggle flags in this environment.",
-    "protectedNote": "Protected — only admins can change flag states"
+    "protectedNote": "Protected — only admins can change flag states",
+    "history": "Environment history",
+    "historyTitle": "Environment history"
   },
   "audit": {
     "title": "Audit Log",

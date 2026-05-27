@@ -10,11 +10,9 @@
         <!-- Header -->
         <div class="flex items-start justify-between border-b px-5 py-4">
           <div class="space-y-0.5">
-            <DialogTitle class="text-sm font-semibold">
-              {{ $t('flags.historyTitle') }}
-            </DialogTitle>
+            <DialogTitle class="text-sm font-semibold">{{ title }}</DialogTitle>
             <DialogDescription class="font-mono text-[11px] text-muted-foreground">
-              {{ flagKey }}
+              {{ label }}
             </DialogDescription>
           </div>
           <DialogClose
@@ -116,7 +114,12 @@ import { timeAgo } from '@/lib/utils'
 const props = defineProps<{
   open: boolean
   projectId: number
-  flagKey: string
+  // resource filters by audit resource column (flag key or env key)
+  resource?: string
+  // actor filters by who performed the action (for user activity history)
+  actor?: string
+  title: string
+  label: string
 }>()
 
 defineEmits<{ 'update:open': [value: boolean] }>()
@@ -130,13 +133,14 @@ const limit = ref(LIMIT)
 const loading = ref(false)
 
 async function load() {
-  if (!props.projectId || !props.flagKey) return
+  if (!props.projectId) return
   loading.value = true
   try {
     const res = await auditApi.list(props.projectId, {
       limit: limit.value,
       offset: (page.value - 1) * limit.value,
-      resource: props.flagKey,
+      resource: props.resource,
+      actor: props.actor,
     })
     entries.value = res.data ?? []
     total.value = res.total
@@ -162,10 +166,16 @@ function goTo(p: number) {
 
 function actionLabel(action: string): string {
   const labels: Record<string, string> = {
-    'flag.created': 'created',
-    'flag.updated': 'updated',
-    'flag.toggled': 'toggled',
-    'flag.deleted': 'deleted',
+    'flag.created': 'created flag',
+    'flag.updated': 'updated flag',
+    'flag.toggled': 'toggled flag',
+    'flag.deleted': 'deleted flag',
+    'env.created': 'created env',
+    'env.updated': 'updated env',
+    'env.deleted': 'deleted env',
+    'user.created': 'created user',
+    'user.updated': 'updated user',
+    'user.deleted': 'deleted user',
   }
   return labels[action] ?? action
 }
