@@ -100,20 +100,23 @@
         {{ $t('nav.administration') }}
       </p>
       <button
+        v-for="item in adminNavItems"
+        :key="item.to"
         class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors border-l-[3px]"
         :class="
-          isActive('/users')
+          isActive(item.to)
             ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
             : 'border-l-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
         "
-        :style="isActive('/users') ? { borderLeftColor: 'oklch(0.54 0.12 265)' } : {}"
-        @click="navigate('/users')"
+        :style="isActive(item.to) ? { borderLeftColor: item.color } : {}"
+        @click="navigate(item.to)"
       >
-        <Users
+        <component
+          :is="item.icon"
           class="size-4 shrink-0"
-          :style="isActive('/users') ? { color: 'oklch(0.54 0.12 265)' } : {}"
+          :style="isActive(item.to) ? { color: item.color } : {}"
         />
-        {{ $t('nav.users') }}
+        {{ item.label }}
       </button>
     </div>
   </nav>
@@ -197,19 +200,16 @@ const projectNavItems = computed(() => {
       label: t('nav.environments'),
       color: 'oklch(0.60 0.14 55)',
     },
-    { to: '/members', icon: UserCheck, label: t('nav.members'), color: 'oklch(0.52 0.12 290)' },
     { to: '/audit', icon: ClipboardList, label: t('nav.audit'), color: 'oklch(0.58 0.10 175)' },
   ]
-  if (authStore.isAdmin) {
-    items.push({
-      to: '/keys',
-      icon: KeyRound,
-      label: t('nav.apiKeys'),
-      color: 'oklch(0.54 0.12 265)',
-    })
-  }
   return items
 })
+
+const adminNavItems = computed(() => [
+  { to: '/members', icon: UserCheck, label: t('nav.members'), color: 'oklch(0.52 0.12 290)' },
+  { to: '/keys', icon: KeyRound, label: t('nav.apiKeys'), color: 'oklch(0.54 0.12 265)' },
+  { to: '/users', icon: Users, label: t('nav.users'), color: 'oklch(0.54 0.12 265)' },
+])
 
 // Deterministic color from project name — cycles through a fixed palette
 const PROJECT_COLORS = [
