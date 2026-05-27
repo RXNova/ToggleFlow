@@ -22,9 +22,15 @@ export interface Condition {
   segment?: string
 }
 
+export interface RolloutStep {
+  variation: number
+  weight: number
+}
+
 export interface Rule {
   conditions: Condition[]
   serve: number | null
+  rollout: RolloutStep[] | null
 }
 
 export interface Variation {

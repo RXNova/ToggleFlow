@@ -208,16 +208,78 @@
               </button>
 
               <!-- Serve -->
-              <div class="flex items-center gap-2 pt-1 border-t">
-                <span class="text-xs text-muted-foreground shrink-0">{{ $t('rules.serve') }}</span>
+              <div class="pt-1 border-t space-y-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs text-muted-foreground shrink-0">{{
+                    $t('rules.serve')
+                  }}</span>
+                  <div class="flex rounded-md border border-input overflow-hidden h-6">
+                    <button
+                      type="button"
+                      class="px-2 text-[11px] transition-colors"
+                      :class="
+                        !isRollout(rule)
+                          ? 'bg-muted font-medium'
+                          : 'text-muted-foreground hover:bg-muted/50'
+                      "
+                      @click="setFixed(ri)"
+                    >
+                      {{ $t('rules.serveFixed') }}
+                    </button>
+                    <button
+                      type="button"
+                      class="px-2 text-[11px] transition-colors border-l border-input"
+                      :class="
+                        isRollout(rule)
+                          ? 'bg-muted font-medium'
+                          : 'text-muted-foreground hover:bg-muted/50'
+                      "
+                      @click="setRollout(ri)"
+                    >
+                      {{ $t('rules.serveRollout') }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Fixed: single variation -->
                 <select
+                  v-if="!isRollout(rule)"
                   v-model.number="rule.serve"
-                  class="h-7 flex-1 rounded-md border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+                  class="h-7 w-full rounded-md border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option v-for="(v, i) in flag.variations" :key="i" :value="i">
                     {{ v.name }}
                   </option>
                 </select>
+
+                <!-- Rollout: weight per variation -->
+                <div v-else class="space-y-1">
+                  <div v-for="(step, si) in rule.rollout" :key="si" class="flex items-center gap-2">
+                    <span class="flex-1 truncate text-xs text-muted-foreground">
+                      {{ flag.variations[step.variation]?.name }}
+                    </span>
+                    <input
+                      v-model.number="step.weight"
+                      type="number"
+                      min="0"
+                      max="100"
+                      class="h-7 w-16 rounded-md border border-input bg-background px-2 text-right text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <span class="w-3 text-xs text-muted-foreground">%</span>
+                  </div>
+                  <div class="flex justify-end pt-0.5">
+                    <span
+                      class="text-xs"
+                      :class="
+                        rolloutTotal(rule) === 100
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-destructive'
+                      "
+                    >
+                      {{ $t('rules.rolloutTotal') }}: {{ rolloutTotal(rule) }}%
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -267,7 +329,14 @@ import { X, Plus, Trash2, ListFilter, Loader2 } from '@lucide/vue'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { flagsApi, type Flag, type FlagEnvState, type Rule, type Condition } from '@/api/flags'
+import {
+  flagsApi,
+  type Flag,
+  type FlagEnvState,
+  type Rule,
+  type Condition,
+  type RolloutStep,
+} from '@/api/flags'
 import { segmentsApi, type Segment } from '@/api/segments'
 
 const props = defineProps<{
@@ -321,7 +390,35 @@ function newCondition(): Condition {
 }
 
 function newRule(): Rule {
-  return { conditions: [newCondition()], serve: 0 }
+  return { conditions: [newCondition()], serve: 0, rollout: [] }
+}
+
+function isRollout(rule: Rule): boolean {
+  return Array.isArray(rule.rollout) && rule.rollout.length > 0
+}
+
+function rolloutTotal(rule: Rule): number {
+  return (rule.rollout ?? []).reduce((sum, s) => sum + (s.weight || 0), 0)
+}
+
+function setFixed(ri: number) {
+  const rule = rules.value[ri]
+  rule.serve = rule.serve ?? 0
+  rule.rollout = []
+}
+
+function setRollout(ri: number) {
+  const rule = rules.value[ri]
+  const n = props.flag.variations.length
+  const base = Math.floor(100 / n)
+  const remainder = 100 - base * n
+  rule.rollout = props.flag.variations.map(
+    (_, i): RolloutStep => ({
+      variation: i,
+      weight: i === 0 ? base + remainder : base,
+    })
+  )
+  rule.serve = null
 }
 
 function addRule() {
@@ -368,8 +465,11 @@ function onTagBackspace(cond: Condition, event: KeyboardEvent) {
 
 async function save() {
   error.value = ''
-  // Validate: every condition must have attribute and at least one value
   for (const rule of rules.value) {
+    if (isRollout(rule) && rolloutTotal(rule) !== 100) {
+      error.value = t('rules.errorRolloutTotal')
+      return
+    }
     for (const cond of rule.conditions) {
       if (!cond.attribute.trim()) {
         error.value = t('rules.errorAttribute')

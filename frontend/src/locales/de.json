@@ -325,7 +325,11 @@
     "errorAttribute": "Alle Bedingungen müssen ein Attribut haben.",
     "errorValue": "Alle Bedingungen müssen mindestens einen Wert haben.",
     "modeValues": "Werte",
-    "modeSegment": "Segment"
+    "modeSegment": "Segment",
+    "serveFixed": "Fest",
+    "serveRollout": "Rollout %",
+    "rolloutTotal": "Gesamt",
+    "errorRolloutTotal": "Rollout-Gewichte müssen zusammen 100 % ergeben."
   },
   "common": {
     "cancel": "Abbrechen",

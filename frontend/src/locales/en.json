@@ -325,7 +325,11 @@
     "errorAttribute": "All conditions must have an attribute.",
     "errorValue": "All conditions must have at least one value.",
     "modeValues": "Values",
-    "modeSegment": "Segment"
+    "modeSegment": "Segment",
+    "serveFixed": "Fixed",
+    "serveRollout": "Rollout %",
+    "rolloutTotal": "Total",
+    "errorRolloutTotal": "Rollout weights must sum to 100%."
   },
   "common": {
     "cancel": "Cancel",
