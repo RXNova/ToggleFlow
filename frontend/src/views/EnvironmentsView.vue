@@ -208,7 +208,7 @@ async function load() {
 }
 
 async function loadSDKKeys(pid: number, eid: number) {
-  sdkKeys[eid] = (await environmentsApi.sdkKeys.list(pid, eid)) as SDKKeyRecord[]
+  sdkKeys[eid] = ((await environmentsApi.sdkKeys.list(pid, eid)) ?? []) as SDKKeyRecord[]
 }
 
 function activeKeyCount(envId: number): number | string {

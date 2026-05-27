@@ -56,7 +56,7 @@ func (h *handler) ListSDKKeys(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid environment id"})
 	}
 
-	var keys []db.SDKKey
+	keys := make([]db.SDKKey, 0)
 	if err := h.db.NewSelect().Model(&keys).
 		Where("environment_id = ?", eid).
 		OrderExpr("created_at ASC").
@@ -136,7 +136,7 @@ func (h *handler) ListAPIKeys(c *fiber.Ctx) error {
 		return err
 	}
 
-	var keys []db.APIKey
+	keys := make([]db.APIKey, 0)
 	if err := h.db.NewSelect().Model(&keys).
 		Where("project_id = ?", pid).
 		OrderExpr("created_at ASC").

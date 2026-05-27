@@ -101,7 +101,8 @@ async function load() {
   if (!projectStore.current) return
   loading.value = true
   try {
-    keys.value = (await environmentsApi.apiKeys.list(projectStore.current.id)) as APIKeyRecord[]
+    keys.value = ((await environmentsApi.apiKeys.list(projectStore.current.id)) ??
+      []) as APIKeyRecord[]
   } finally {
     loading.value = false
   }
