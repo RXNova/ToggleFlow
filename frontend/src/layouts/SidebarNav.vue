@@ -200,13 +200,13 @@ const projectNavItems = computed(() => {
       label: t('nav.environments'),
       color: 'oklch(0.60 0.14 55)',
     },
+    { to: '/members', icon: UserCheck, label: t('nav.members'), color: 'oklch(0.52 0.12 290)' },
     { to: '/audit', icon: ClipboardList, label: t('nav.audit'), color: 'oklch(0.58 0.10 175)' },
   ]
   return items
 })
 
 const adminNavItems = computed(() => [
-  { to: '/members', icon: UserCheck, label: t('nav.members'), color: 'oklch(0.52 0.12 290)' },
   { to: '/keys', icon: KeyRound, label: t('nav.apiKeys'), color: 'oklch(0.54 0.12 265)' },
   { to: '/users', icon: Users, label: t('nav.users'), color: 'oklch(0.54 0.12 265)' },
 ])

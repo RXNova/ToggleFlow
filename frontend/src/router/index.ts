@@ -24,12 +24,7 @@ const router = createRouter({
           name: 'environments',
           component: () => import('@/views/EnvironmentsView.vue'),
         },
-        {
-          path: 'members',
-          name: 'members',
-          component: () => import('@/views/MembersView.vue'),
-          meta: { requiresAdmin: true },
-        },
+        { path: 'members', name: 'members', component: () => import('@/views/MembersView.vue') },
         { path: 'audit', name: 'audit', component: () => import('@/views/AuditView.vue') },
         {
           path: 'keys',
