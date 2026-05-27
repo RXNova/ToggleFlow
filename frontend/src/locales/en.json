@@ -32,11 +32,13 @@
     "submitting": "Signing in..."
   },
   "nav": {
+    "project": "Project",
     "projects": "Projects",
     "flags": "Feature Flags",
     "environments": "Environments",
     "members": "Members",
     "audit": "Audit Log",
+    "administration": "Administration",
     "users": "Users",
     "signOut": "Sign out"
   },

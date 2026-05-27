@@ -32,11 +32,13 @@
     "submitting": "Anmeldung läuft..."
   },
   "nav": {
+    "project": "Projekt",
     "projects": "Projekte",
     "flags": "Feature-Flags",
     "environments": "Umgebungen",
     "members": "Mitglieder",
     "audit": "Audit-Protokoll",
+    "administration": "Administration",
     "users": "Benutzer",
     "signOut": "Abmelden"
   },

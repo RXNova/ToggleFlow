@@ -6,18 +6,45 @@
   </div>
 
   <!-- Project selector -->
-  <div class="border-b px-2 py-2 shrink-0">
+  <div class="border-b px-2 py-2.5 shrink-0">
+    <p
+      class="px-2 pb-1.5 text-[10px] font-medium uppercase tracking-wider text-sidebar-foreground/40"
+    >
+      {{ $t('nav.project') }}
+    </p>
     <DropdownMenu>
       <DropdownMenuTrigger as-child>
         <button
-          class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-sidebar-accent"
+          class="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors hover:bg-sidebar-accent"
+          :class="projectStore.current ? '' : 'opacity-60'"
         >
+          <!-- Project avatar -->
+          <div
+            v-if="projectStore.current"
+            class="flex size-6 shrink-0 items-center justify-center rounded-md text-[11px] font-bold uppercase text-white"
+            :style="{ background: projectColor(projectStore.current.name) }"
+          >
+            {{ projectStore.current.name[0] }}
+          </div>
+          <div
+            v-else
+            class="flex size-6 shrink-0 items-center justify-center rounded-md bg-sidebar-accent"
+          >
+            <FolderOpen class="size-3.5 text-sidebar-foreground/50" />
+          </div>
+
           <div class="flex-1 min-w-0">
-            <p class="truncate font-medium text-sidebar-foreground text-xs">
+            <p class="truncate text-xs font-semibold text-sidebar-foreground leading-none">
               {{ projectStore.current?.name ?? $t('projects.select') }}
             </p>
+            <p
+              v-if="projectStore.current"
+              class="mt-0.5 truncate text-[10px] text-sidebar-foreground/50 leading-none"
+            >
+              {{ projectStore.current.key }}
+            </p>
           </div>
-          <ChevronsUpDown class="size-3.5 shrink-0 text-sidebar-foreground/50" />
+          <ChevronsUpDown class="size-3.5 shrink-0 text-sidebar-foreground/40" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent class="w-52" align="start">
@@ -41,21 +68,45 @@
   </div>
 
   <!-- Nav -->
-  <nav class="flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
-    <button
-      v-for="item in navItems"
-      :key="item.to"
-      class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
-      :class="
-        isActive(item.to)
-          ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-          : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-      "
-      @click="navigate(item.to)"
-    >
-      <component :is="item.icon" class="size-4 shrink-0" />
-      {{ item.label }}
-    </button>
+  <nav class="flex-1 overflow-y-auto px-2 py-2.5 flex flex-col gap-4">
+    <!-- Project nav -->
+    <div class="space-y-0.5">
+      <button
+        v-for="item in projectNavItems"
+        :key="item.to"
+        class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
+        :class="
+          isActive(item.to)
+            ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+        "
+        @click="navigate(item.to)"
+      >
+        <component :is="item.icon" class="size-4 shrink-0" />
+        {{ item.label }}
+      </button>
+    </div>
+
+    <!-- Administration section — admin+ only -->
+    <div v-if="authStore.isAdmin" class="space-y-0.5">
+      <p
+        class="px-2 pb-1 text-[10px] font-medium uppercase tracking-wider text-sidebar-foreground/40"
+      >
+        {{ $t('nav.administration') }}
+      </p>
+      <button
+        class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
+        :class="
+          isActive('/users')
+            ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+        "
+        @click="navigate('/users')"
+      >
+        <Users class="size-4 shrink-0" />
+        {{ $t('nav.users') }}
+      </button>
+    </div>
   </nav>
 
   <!-- User footer -->
@@ -126,19 +177,30 @@ const authStore = useAuthStore()
 const projectStore = useProjectStore()
 const createDialogOpen = ref(false)
 
-const navItems = computed(() => {
-  const items = [
-    { to: '/projects', icon: FolderOpen, label: t('nav.projects') },
-    { to: '/flags', icon: Flag, label: t('nav.flags') },
-    { to: '/environments', icon: Globe, label: t('nav.environments') },
-    { to: '/members', icon: UserCheck, label: t('nav.members') },
-    { to: '/audit', icon: ClipboardList, label: t('nav.audit') },
-  ]
-  if (authStore.isAdmin) {
-    items.push({ to: '/users', icon: Users, label: t('nav.users') })
-  }
-  return items
-})
+const projectNavItems = computed(() => [
+  { to: '/projects', icon: FolderOpen, label: t('nav.projects') },
+  { to: '/flags', icon: Flag, label: t('nav.flags') },
+  { to: '/environments', icon: Globe, label: t('nav.environments') },
+  { to: '/members', icon: UserCheck, label: t('nav.members') },
+  { to: '/audit', icon: ClipboardList, label: t('nav.audit') },
+])
+
+// Deterministic color from project name — cycles through a fixed palette
+const PROJECT_COLORS = [
+  '#6366f1',
+  '#8b5cf6',
+  '#ec4899',
+  '#f59e0b',
+  '#10b981',
+  '#3b82f6',
+  '#ef4444',
+  '#14b8a6',
+]
+function projectColor(name: string): string {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  return PROJECT_COLORS[Math.abs(hash) % PROJECT_COLORS.length]
+}
 
 function isActive(path: string) {
   return route.path.startsWith(path)
