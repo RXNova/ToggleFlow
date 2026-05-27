@@ -101,6 +101,8 @@
     "variationName": "Name",
     "variationValue": "Wert",
     "addVariation": "Variation hinzufügen",
+    "history": "Flag-Verlauf",
+    "historyTitle": "Flag-Verlauf",
     "types": {
       "boolean": "Boolean",
       "string": "String",

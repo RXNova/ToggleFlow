@@ -96,6 +96,14 @@
 
                 <!-- Actions -->
                 <div class="flex items-center gap-1 shrink-0">
+                  <Tooltip :text="$t('flags.history')">
+                    <button
+                      class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                      @click="openHistory(flag)"
+                    >
+                      <History class="size-3.5" />
+                    </button>
+                  </Tooltip>
                   <Tooltip :text="$t('common.edit')">
                     <button
                       class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -213,6 +221,12 @@
     :project-id="projectStore.current.id"
     @deleted="onDeleted"
   />
+  <FlagHistorySheet
+    v-if="projectStore.current && historyTarget"
+    v-model:open="historyOpen"
+    :project-id="projectStore.current.id"
+    :flag-key="historyTarget.key"
+  />
 </template>
 
 <script setup lang="ts">
@@ -230,6 +244,7 @@ import {
   CalendarDays,
   Clock,
   Lock,
+  History,
 } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -242,6 +257,7 @@ import { timeAgo } from '@/lib/utils'
 import CreateFlagDialog from '@/components/CreateFlagDialog.vue'
 import EditFlagDialog from '@/components/EditFlagDialog.vue'
 import DeleteFlagDialog from '@/components/DeleteFlagDialog.vue'
+import FlagHistorySheet from '@/components/FlagHistorySheet.vue'
 import { Tooltip } from '@/components/ui/tooltip'
 
 const LIMIT = 20
@@ -259,6 +275,8 @@ const editDialogOpen = ref(false)
 const editTarget = ref<Flag | null>(null)
 const deleteDialogOpen = ref(false)
 const deleteTarget = ref<Flag | null>(null)
+const historyOpen = ref(false)
+const historyTarget = ref<Flag | null>(null)
 const toggling = ref<Record<string, boolean>>({})
 
 function toggleKey(flagId: number, envId: number) {
@@ -312,6 +330,11 @@ function openEdit(flag: Flag) {
 function openDelete(flag: Flag) {
   deleteTarget.value = flag
   deleteDialogOpen.value = true
+}
+
+function openHistory(flag: Flag) {
+  historyTarget.value = flag
+  historyOpen.value = true
 }
 
 function onCreated() {

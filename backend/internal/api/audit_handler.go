@@ -28,6 +28,10 @@ func (h *handler) ListAudit(c *fiber.Ctx) error {
 		Where("project_id = ?", pid).
 		OrderExpr("created_at DESC")
 
+	if resource := c.Query("resource"); resource != "" {
+		q = q.Where("resource = ?", resource)
+	}
+
 	total, err := q.Count(ctx)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "failed to count audit entries"})

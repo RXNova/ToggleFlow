@@ -12,6 +12,6 @@ export interface AuditEntry {
 }
 
 export const auditApi = {
-  list: (projectId: number, params?: PageParams) =>
+  list: (projectId: number, params?: PageParams & { resource?: string }) =>
     api.get<PageResult<AuditEntry>>(`/projects/${projectId}/audit`, params),
 }
