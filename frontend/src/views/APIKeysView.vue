@@ -25,15 +25,15 @@
           <Loader2 class="size-6 animate-spin text-muted-foreground/40" />
         </div>
 
-        <div v-else class="space-y-8">
-          <!-- SDK Keys -->
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="space-y-0.5">
-                <h2 class="text-sm font-semibold">{{ $t('keys.sdkSection') }}</h2>
-                <p class="text-xs text-muted-foreground">{{ $t('keys.sdkSectionDescription') }}</p>
-              </div>
-            </div>
+        <Tabs v-else default-value="sdk" class="space-y-4">
+          <TabsList>
+            <TabsTrigger value="sdk">{{ $t('keys.sdkSection') }}</TabsTrigger>
+            <TabsTrigger value="api">{{ $t('keys.apiSection') }}</TabsTrigger>
+          </TabsList>
+
+          <!-- SDK Keys tab -->
+          <TabsContent value="sdk" class="space-y-3">
+            <p class="text-xs text-muted-foreground">{{ $t('keys.sdkSectionDescription') }}</p>
 
             <div v-if="environments.length === 0" class="text-sm text-muted-foreground italic">
               {{ $t('environments.emptyTitle') }}
@@ -92,17 +92,12 @@
                 </div>
               </div>
             </div>
-          </div>
+          </TabsContent>
 
-          <Separator />
-
-          <!-- API Keys -->
-          <div class="space-y-3">
+          <!-- API Keys tab -->
+          <TabsContent value="api" class="space-y-3">
             <div class="flex items-center justify-between">
-              <div class="space-y-0.5">
-                <h2 class="text-sm font-semibold">{{ $t('keys.apiSection') }}</h2>
-                <p class="text-xs text-muted-foreground">{{ $t('keys.apiSectionDescription') }}</p>
-              </div>
+              <p class="text-xs text-muted-foreground">{{ $t('keys.apiSectionDescription') }}</p>
               <Button
                 size="sm"
                 variant="ghost"
@@ -137,8 +132,8 @@
                 </button>
               </div>
             </div>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </template>
   </div>
@@ -176,6 +171,7 @@ import { ref, watch, reactive } from 'vue'
 import { FolderOpen, Plus, Loader2, Trash2 } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { useProjectStore } from '@/stores/project'
 import {
   environmentsApi,
