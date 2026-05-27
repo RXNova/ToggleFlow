@@ -48,12 +48,20 @@ func Register(app *fiber.App, database *bun.DB, broker *stream.Broker) {
 	protected.Get("/projects/:pid/flags/:key", h.GetFlag)
 	protected.Get("/projects/:pid/audit", h.ListAudit)
 
+	// Segments — any member to read, Editor and above to write
+	protected.Get("/projects/:pid/segments", h.ListSegments)
+
 	flagsWrite := protected.Group("/projects/:pid/flags", auth.RequireRole(db.RoleEditor))
 	flagsWrite.Post("/", h.CreateFlag)
 	flagsWrite.Patch("/:key", h.UpdateFlag)
 	flagsWrite.Patch("/:key/env", h.ToggleFlagEnv)
 	flagsWrite.Put("/:key/rules", h.SaveFlagRules)
 	flagsWrite.Delete("/:key", h.DeleteFlag)
+
+	segmentsWrite := protected.Group("/projects/:pid/segments", auth.RequireRole(db.RoleEditor))
+	segmentsWrite.Post("/", h.CreateSegment)
+	segmentsWrite.Patch("/:sid", h.UpdateSegment)
+	segmentsWrite.Delete("/:sid", h.DeleteSegment)
 
 	// Project + environment write ops — Owner and above
 	projectsOwner := protected.Group("/projects", auth.RequireRole(db.RoleOwner))

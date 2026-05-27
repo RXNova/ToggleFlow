@@ -41,7 +41,8 @@
     "administration": "Administration",
     "users": "Users",
     "signOut": "Sign out",
-    "apiKeys": "Keys"
+    "apiKeys": "Keys",
+    "segments": "Segments"
   },
   "roles": {
     "superuser": "Superuser",
@@ -271,6 +272,35 @@
     "apiSection": "API Keys",
     "apiSectionDescription": "Programmatic access to create and manage flags in this project"
   },
+  "segments": {
+    "title": "Segments",
+    "subtitle": "Reusable groups of users or values for targeting rules",
+    "create": "New segment",
+    "creating": "Creating...",
+    "saving": "Saving...",
+    "createTitle": "Create segment",
+    "createDescription": "Define a named group of values you can reference in targeting rules.",
+    "editTitle": "Edit segment",
+    "name": "Name",
+    "namePlaceholder": "Test Users",
+    "key": "Key",
+    "values": "Values",
+    "valuesPlaceholder": "type + Enter to add",
+    "valuesHint": "Accepts strings and numbers. Enter or comma to add.",
+    "noValues": "No values yet",
+    "valueCount": "{n} values",
+    "emptyTitle": "No segments yet",
+    "emptyDescription": "Create segments to reuse lists of users or values across targeting rules.",
+    "deleteTitle": "Delete segment",
+    "deleteWarning": "This will permanently delete",
+    "deleteWarningEnd": ". Any rules referencing this segment will no longer match.",
+    "deleting": "Deleting...",
+    "deleteCountdown": "Delete ({countdown}s)",
+    "deleteConfirm": "Delete segment",
+    "errorName": "Name is required.",
+    "pickSegment": "Pick a segment",
+    "noSegments": "No segments defined for this project"
+  },
   "rules": {
     "title": "Targeting Rules",
     "description": "Rules are evaluated top to bottom. The first match wins.",
@@ -293,7 +323,9 @@
     "saving": "Saving...",
     "save": "Save rules",
     "errorAttribute": "All conditions must have an attribute.",
-    "errorValue": "All conditions must have at least one value."
+    "errorValue": "All conditions must have at least one value.",
+    "modeValues": "Values",
+    "modeSegment": "Segment"
   },
   "common": {
     "cancel": "Cancel",
@@ -304,7 +336,8 @@
     "description": "Description",
     "descriptionPlaceholder": "Optional description",
     "cannotUndo": "This action cannot be undone",
-    "error": "Something went wrong"
+    "error": "Something went wrong",
+    "save": "Save"
   },
   "reset": {
     "title": "Reset your password",

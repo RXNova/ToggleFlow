@@ -19,6 +19,7 @@ export interface Condition {
   attribute: string
   operator: ConditionOperator
   values: (string | number)[]
+  segment?: string
 }
 
 export interface Rule {

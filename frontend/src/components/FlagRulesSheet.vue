@@ -99,35 +99,84 @@
                       </optgroup>
                     </select>
                     <!-- Values -->
-                    <div class="min-w-0">
-                      <!-- Tag input for in / notIn -->
-                      <div
-                        v-if="cond.operator === 'in' || cond.operator === 'notIn'"
-                        class="flex flex-wrap gap-1 rounded-md border border-input bg-background px-2 py-1 min-h-7 focus-within:ring-2 focus-within:ring-ring cursor-text"
-                        @click="focusTagInput(ri, ci)"
-                      >
-                        <span
-                          v-for="(val, vi) in cond.values"
-                          :key="vi"
-                          class="inline-flex items-center gap-0.5 rounded bg-muted px-1.5 py-0.5 text-[11px]"
-                        >
-                          {{ val }}
-                          <button class="hover:text-destructive" @click.stop="removeTag(cond, vi)">
-                            <X class="size-2.5" />
+                    <div class="min-w-0 space-y-1">
+                      <!-- in / notIn: mode toggle + tag input or segment picker -->
+                      <template v-if="cond.operator === 'in' || cond.operator === 'notIn'">
+                        <!-- mode toggle -->
+                        <div class="flex rounded-md border border-input overflow-hidden h-7 w-fit">
+                          <button
+                            type="button"
+                            class="px-2 text-[11px] transition-colors"
+                            :class="
+                              !cond.segment
+                                ? 'bg-muted font-medium'
+                                : 'text-muted-foreground hover:bg-muted/50'
+                            "
+                            @click="cond.segment = undefined"
+                          >
+                            {{ $t('rules.modeValues') }}
                           </button>
-                        </span>
-                        <input
-                          :ref="(el) => setTagInputRef(el, ri, ci)"
-                          class="flex-1 min-w-16 text-xs bg-transparent outline-none"
-                          :placeholder="cond.values.length === 0 ? $t('rules.tagPlaceholder') : ''"
-                          @keydown.enter.prevent="addTag(cond, $event)"
-                          @keydown.backspace="onTagBackspace(cond, $event)"
-                          @keydown="
-                            (e: KeyboardEvent) =>
-                              e.key === ',' && (e.preventDefault(), addTag(cond, e))
-                          "
-                        />
-                      </div>
+                          <button
+                            type="button"
+                            class="px-2 text-[11px] transition-colors border-l border-input"
+                            :class="
+                              cond.segment
+                                ? 'bg-muted font-medium'
+                                : 'text-muted-foreground hover:bg-muted/50'
+                            "
+                            @click="cond.segment = cond.segment || (segments[0]?.key ?? '')"
+                          >
+                            {{ $t('rules.modeSegment') }}
+                          </button>
+                        </div>
+                        <!-- tag input -->
+                        <div
+                          v-if="!cond.segment"
+                          class="flex flex-wrap gap-1 rounded-md border border-input bg-background px-2 py-1 min-h-7 focus-within:ring-2 focus-within:ring-ring cursor-text"
+                          @click="focusTagInput(ri, ci)"
+                        >
+                          <span
+                            v-for="(val, vi) in cond.values"
+                            :key="vi"
+                            class="inline-flex items-center gap-0.5 rounded bg-muted px-1.5 py-0.5 text-[11px]"
+                          >
+                            {{ val }}
+                            <button
+                              class="hover:text-destructive"
+                              @click.stop="removeTag(cond, vi)"
+                            >
+                              <X class="size-2.5" />
+                            </button>
+                          </span>
+                          <input
+                            :ref="(el) => setTagInputRef(el, ri, ci)"
+                            class="flex-1 min-w-16 text-xs bg-transparent outline-none"
+                            :placeholder="
+                              cond.values.length === 0 ? $t('rules.tagPlaceholder') : ''
+                            "
+                            @keydown.enter.prevent="addTag(cond, $event)"
+                            @keydown.backspace="onTagBackspace(cond, $event)"
+                            @keydown="
+                              (e: KeyboardEvent) =>
+                                e.key === ',' && (e.preventDefault(), addTag(cond, e))
+                            "
+                          />
+                        </div>
+                        <!-- segment picker -->
+                        <div v-else>
+                          <select
+                            v-model="cond.segment"
+                            class="h-7 w-full rounded-md border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+                          >
+                            <option v-if="segments.length === 0" value="" disabled>
+                              {{ $t('segments.noSegments') }}
+                            </option>
+                            <option v-for="seg in segments" :key="seg.key" :value="seg.key">
+                              {{ seg.name }} ({{ seg.values.length }})
+                            </option>
+                          </select>
+                        </div>
+                      </template>
                       <!-- Single value input -->
                       <Input
                         v-else
@@ -219,6 +268,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { flagsApi, type Flag, type FlagEnvState, type Rule, type Condition } from '@/api/flags'
+import { segmentsApi, type Segment } from '@/api/segments'
 
 const props = defineProps<{
   open: boolean
@@ -235,6 +285,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const rules = ref<Rule[]>([])
+const segments = ref<Segment[]>([])
 const saving = ref(false)
 const error = ref('')
 
@@ -255,10 +306,11 @@ function focusTagInput(ri: number, ci: number) {
 
 watch(
   () => props.open,
-  (v) => {
+  async (v) => {
     if (v) {
       rules.value = JSON.parse(JSON.stringify(props.envState.rules ?? []))
       error.value = ''
+      segments.value = await segmentsApi.list(props.projectId).catch(() => [])
     }
   },
   { immediate: true }
@@ -290,7 +342,10 @@ function removeCondition(rule: Rule, ci: number) {
 
 function onOperatorChange(cond: Condition) {
   const multi = cond.operator === 'in' || cond.operator === 'notIn'
-  if (!multi) cond.values = cond.values.length > 0 ? [cond.values[0]] : []
+  if (!multi) {
+    cond.values = cond.values.length > 0 ? [cond.values[0]] : []
+    cond.segment = undefined
+  }
 }
 
 function addTag(cond: Condition, event: Event) {
@@ -320,9 +375,11 @@ async function save() {
         error.value = t('rules.errorAttribute')
         return
       }
+      const usesSegment = (cond.operator === 'in' || cond.operator === 'notIn') && cond.segment
       if (
-        cond.values.length === 0 ||
-        (cond.values.length === 1 && String(cond.values[0]).trim() === '')
+        !usesSegment &&
+        (cond.values.length === 0 ||
+          (cond.values.length === 1 && String(cond.values[0]).trim() === ''))
       ) {
         error.value = t('rules.errorValue')
         return

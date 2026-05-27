@@ -22,6 +22,7 @@ type Condition struct {
 	Attribute string   `json:"attribute"`
 	Operator  Operator `json:"operator"`
 	Values    []any    `json:"values"`
+	Segment   string   `json:"segment,omitempty"` // segment key — replaces Values for in/notIn when set
 }
 
 // Rule serves a fixed variation index OR a percentage rollout (non-nil Rollout).

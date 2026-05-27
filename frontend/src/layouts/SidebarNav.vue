@@ -168,6 +168,7 @@ import {
   ChevronsUpDown,
   Check,
   Plus,
+  BookUser,
 } from '@lucide/vue'
 import {
   DropdownMenu,
@@ -200,6 +201,7 @@ const projectNavItems = computed(() => {
       label: t('nav.environments'),
       color: 'oklch(0.60 0.14 55)',
     },
+    { to: '/segments', icon: BookUser, label: t('nav.segments'), color: 'oklch(0.56 0.14 165)' },
     { to: '/members', icon: UserCheck, label: t('nav.members'), color: 'oklch(0.52 0.12 290)' },
     { to: '/audit', icon: ClipboardList, label: t('nav.audit'), color: 'oklch(0.58 0.10 175)' },
   ]

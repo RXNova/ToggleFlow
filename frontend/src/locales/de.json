@@ -41,7 +41,8 @@
     "administration": "Administration",
     "users": "Benutzer",
     "signOut": "Abmelden",
-    "apiKeys": "Schlüssel"
+    "apiKeys": "Schlüssel",
+    "segments": "Segmente"
   },
   "roles": {
     "superuser": "Superuser",
@@ -271,6 +272,35 @@
     "apiSection": "API-Schlüssel",
     "apiSectionDescription": "Programmatischer Zugriff zur Verwaltung von Flags in diesem Projekt"
   },
+  "segments": {
+    "title": "Segmente",
+    "subtitle": "Wiederverwendbare Benutzer- oder Wertgruppen für Targeting-Regeln",
+    "create": "Neues Segment",
+    "creating": "Wird erstellt...",
+    "saving": "Wird gespeichert...",
+    "createTitle": "Segment erstellen",
+    "createDescription": "Definieren Sie eine benannte Gruppe von Werten, die Sie in Targeting-Regeln referenzieren können.",
+    "editTitle": "Segment bearbeiten",
+    "name": "Name",
+    "namePlaceholder": "Testbenutzer",
+    "key": "Schlüssel",
+    "values": "Werte",
+    "valuesPlaceholder": "eingeben + Enter zum Hinzufügen",
+    "valuesHint": "Akzeptiert Zeichenketten und Zahlen. Enter oder Komma zum Hinzufügen.",
+    "noValues": "Noch keine Werte",
+    "valueCount": "{n} Werte",
+    "emptyTitle": "Noch keine Segmente",
+    "emptyDescription": "Erstellen Sie Segmente, um Listen von Benutzern oder Werten in Targeting-Regeln wiederzuverwenden.",
+    "deleteTitle": "Segment löschen",
+    "deleteWarning": "Folgendes wird dauerhaft gelöscht:",
+    "deleteWarningEnd": ". Regeln, die dieses Segment referenzieren, werden nicht mehr zutreffen.",
+    "deleting": "Wird gelöscht...",
+    "deleteCountdown": "Löschen ({countdown}s)",
+    "deleteConfirm": "Segment löschen",
+    "errorName": "Name ist erforderlich.",
+    "pickSegment": "Segment auswählen",
+    "noSegments": "Noch keine Segmente für dieses Projekt"
+  },
   "rules": {
     "title": "Targeting-Regeln",
     "description": "Regeln werden von oben nach unten ausgewertet. Die erste Übereinstimmung gewinnt.",
@@ -293,7 +323,9 @@
     "saving": "Wird gespeichert...",
     "save": "Regeln speichern",
     "errorAttribute": "Alle Bedingungen müssen ein Attribut haben.",
-    "errorValue": "Alle Bedingungen müssen mindestens einen Wert haben."
+    "errorValue": "Alle Bedingungen müssen mindestens einen Wert haben.",
+    "modeValues": "Werte",
+    "modeSegment": "Segment"
   },
   "common": {
     "cancel": "Abbrechen",
@@ -304,7 +336,8 @@
     "description": "Beschreibung",
     "descriptionPlaceholder": "Optionale Beschreibung",
     "cannotUndo": "Diese Aktion kann nicht rückgängig gemacht werden",
-    "error": "Etwas ist schiefgelaufen"
+    "error": "Etwas ist schiefgelaufen",
+    "save": "Speichern"
   },
   "reset": {
     "title": "Passwort zurücksetzen",

@@ -19,7 +19,8 @@ type EvalInput struct {
 	Enabled          bool
 	Variations       int // total number of variations
 	DefaultVariation int
-	RulesJSON        string // raw JSON from flag_environments.rules
+	RulesJSON        string           // raw JSON from flag_environments.rules
+	Segments         map[string][]any // segment key → values, for resolving segment refs in conditions
 }
 
 // Evaluate returns the variation index to serve.
@@ -41,7 +42,7 @@ func Evaluate(in EvalInput) int {
 	}
 
 	for _, rule := range rules {
-		if matchesAll(rule.Conditions, in.UserCtx) {
+		if matchesAll(rule.Conditions, in.UserCtx, in.Segments) {
 			return serve(rule, in.FlagKey, in.UserKey, in.Variations, in.DefaultVariation)
 		}
 	}
@@ -68,28 +69,38 @@ func serve(rule Rule, flagKey, userKey string, numVariations, defaultVariation i
 
 // matchesAll returns true when every condition in the slice is satisfied.
 // An empty conditions slice always matches (catch-all rule).
-func matchesAll(conditions []Condition, ctx UserContext) bool {
+func matchesAll(conditions []Condition, ctx UserContext, segments map[string][]any) bool {
 	for _, c := range conditions {
-		if !matchCondition(c, ctx) {
+		if !matchCondition(c, ctx, segments) {
 			return false
 		}
 	}
 	return true
 }
 
-func matchCondition(c Condition, ctx UserContext) bool {
+func matchCondition(c Condition, ctx UserContext, segments map[string][]any) bool {
 	raw, ok := ctx[c.Attribute]
 	if !ok {
 		return false
 	}
 	attr := fmt.Sprintf("%v", raw)
 
+	// For in/notIn, resolve segment reference to its values if set.
+	values := c.Values
+	if c.Segment != "" && (c.Operator == OpIn || c.Operator == OpNotIn) {
+		if sv, exists := segments[c.Segment]; exists {
+			values = sv
+		} else {
+			values = nil
+		}
+	}
+
 	switch c.Operator {
 	case OpEquals:
-		return len(c.Values) > 0 && attr == fmt.Sprintf("%v", c.Values[0])
+		return len(values) > 0 && attr == fmt.Sprintf("%v", values[0])
 
 	case OpIn:
-		for _, v := range c.Values {
+		for _, v := range values {
 			if attr == fmt.Sprintf("%v", v) {
 				return true
 			}
@@ -97,7 +108,7 @@ func matchCondition(c Condition, ctx UserContext) bool {
 		return false
 
 	case OpNotIn:
-		for _, v := range c.Values {
+		for _, v := range values {
 			if attr == fmt.Sprintf("%v", v) {
 				return false
 			}
@@ -105,16 +116,16 @@ func matchCondition(c Condition, ctx UserContext) bool {
 		return true
 
 	case OpContains:
-		return len(c.Values) > 0 && strings.Contains(attr, fmt.Sprintf("%v", c.Values[0]))
+		return len(values) > 0 && strings.Contains(attr, fmt.Sprintf("%v", values[0]))
 
 	case OpStartsWith:
-		return len(c.Values) > 0 && strings.HasPrefix(attr, fmt.Sprintf("%v", c.Values[0]))
+		return len(values) > 0 && strings.HasPrefix(attr, fmt.Sprintf("%v", values[0]))
 
 	case OpEndsWith:
-		return len(c.Values) > 0 && strings.HasSuffix(attr, fmt.Sprintf("%v", c.Values[0]))
+		return len(values) > 0 && strings.HasSuffix(attr, fmt.Sprintf("%v", values[0]))
 
 	case OpGt, OpGte, OpLt, OpLte:
-		return compareNumeric(c.Operator, attr, c.Values)
+		return compareNumeric(c.Operator, attr, values)
 	}
 
 	return false

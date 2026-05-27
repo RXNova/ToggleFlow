@@ -155,6 +155,17 @@ func (h *handler) SDKEvaluate(c *fiber.Ctx) error {
 		_ = json.Unmarshal([]byte(flag.Variations), &variations)
 	}
 
+	var dbSegments []db.Segment
+	_ = h.db.NewSelect().Model(&dbSegments).Where("project_id = ?", env.ProjectID).Scan(ctx)
+	segments := make(map[string][]any, len(dbSegments))
+	for _, s := range dbSegments {
+		var vals []any
+		if s.Values != "" {
+			_ = json.Unmarshal([]byte(s.Values), &vals)
+		}
+		segments[s.Key] = vals
+	}
+
 	variationIdx := eval.Evaluate(eval.EvalInput{
 		FlagKey:          flag.Key,
 		UserKey:          req.UserKey,
@@ -163,6 +174,7 @@ func (h *handler) SDKEvaluate(c *fiber.Ctx) error {
 		Variations:       len(variations),
 		DefaultVariation: fe.DefaultVariation,
 		RulesJSON:        fe.Rules,
+		Segments:         segments,
 	})
 
 	var value json.RawMessage

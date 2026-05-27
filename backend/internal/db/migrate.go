@@ -23,6 +23,7 @@ func Migrate(db *bun.DB) error {
 		(*ProjectMember)(nil),
 		(*SDKKey)(nil),
 		(*APIKey)(nil),
+		(*Segment)(nil),
 	}
 
 	for _, model := range models {

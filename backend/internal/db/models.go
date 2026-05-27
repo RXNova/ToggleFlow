@@ -137,6 +137,17 @@ type APIKey struct {
 	CreatedAt     time.Time  `bun:"created_at,notnull,default:current_timestamp" json:"created_at"`
 }
 
+type Segment struct {
+	bun.BaseModel `bun:"table:segments"`
+	ID            int64     `bun:"id,pk,autoincrement"                          json:"id"`
+	ProjectID     int64     `bun:"project_id,notnull"                           json:"project_id"`
+	Name          string    `bun:"name,notnull"                                 json:"name"`
+	Key           string    `bun:"key,notnull"                                  json:"key"`
+	Values        string    `bun:"values,type:text,notnull,default:'[]'"        json:"-"`
+	CreatedAt     time.Time `bun:"created_at,notnull,default:current_timestamp" json:"created_at"`
+	UpdatedAt     time.Time `bun:"updated_at,notnull,default:current_timestamp" json:"updated_at"`
+}
+
 type AuditEntry struct {
 	bun.BaseModel `bun:"table:audit_entries"`
 	ID            int64     `bun:"id,pk,autoincrement"                          json:"id"`
