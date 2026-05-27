@@ -270,7 +270,19 @@
     "sdkSection": "SDK Keys",
     "sdkSectionDescription": "Authenticate your server-side SDK clients per environment",
     "apiSection": "API Keys",
-    "apiSectionDescription": "Programmatic access to create and manage flags in this project"
+    "apiSectionDescription": "Programmatic access to create and manage flags in this project",
+    "usageSection": "Usage",
+    "usageSdkTitle": "SDK Keys",
+    "usageSdkDescription": "Read-only access to flag configs. Pass the key as a query parameter — no headers needed.",
+    "usagePollFlags": "Poll all flag configs",
+    "usageEvaluate": "Evaluate a flag for a user",
+    "usageStream": "Real-time flag updates (SSE)",
+    "usageStreamNote": "The server keeps this connection open and pushes an event whenever a flag changes. Use EventSource in the browser or any SSE client on the server.",
+    "usageApiTitle": "API Keys",
+    "usageApiDescription": "Full management access. Pass the key as a Bearer token in the Authorization header.",
+    "usageListFlags": "List flags",
+    "usageToggleFlag": "Enable / disable a flag",
+    "usageCreateFlag": "Create a flag"
   },
   "segments": {
     "title": "Segments",

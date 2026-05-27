@@ -270,7 +270,19 @@
     "sdkSection": "SDK-Schlüssel",
     "sdkSectionDescription": "Authentifizieren Sie Ihre serverseitigen SDK-Clients pro Umgebung",
     "apiSection": "API-Schlüssel",
-    "apiSectionDescription": "Programmatischer Zugriff zur Verwaltung von Flags in diesem Projekt"
+    "apiSectionDescription": "Programmatischer Zugriff zur Verwaltung von Flags in diesem Projekt",
+    "usageSection": "Nutzung",
+    "usageSdkTitle": "SDK-Schlüssel",
+    "usageSdkDescription": "Nur-Lese-Zugriff auf Flag-Konfigurationen. Den Schlüssel als Query-Parameter übergeben — keine Header erforderlich.",
+    "usagePollFlags": "Alle Flag-Konfigurationen abrufen",
+    "usageEvaluate": "Flag für einen Nutzer auswerten",
+    "usageStream": "Echtzeit-Flag-Updates (SSE)",
+    "usageStreamNote": "Der Server hält diese Verbindung offen und sendet ein Event, sobald sich ein Flag ändert. Im Browser EventSource verwenden oder einen SSE-Client auf dem Server.",
+    "usageApiTitle": "API-Schlüssel",
+    "usageApiDescription": "Vollständiger Verwaltungszugriff. Den Schlüssel als Bearer-Token im Authorization-Header übergeben.",
+    "usageListFlags": "Flags auflisten",
+    "usageToggleFlag": "Flag aktivieren / deaktivieren",
+    "usageCreateFlag": "Flag erstellen"
   },
   "segments": {
     "title": "Segmente",

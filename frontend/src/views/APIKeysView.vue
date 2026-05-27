@@ -29,6 +29,7 @@
           <TabsList>
             <TabsTrigger value="sdk">{{ $t('keys.sdkSection') }}</TabsTrigger>
             <TabsTrigger value="api">{{ $t('keys.apiSection') }}</TabsTrigger>
+            <TabsTrigger value="usage">{{ $t('keys.usageSection') }}</TabsTrigger>
           </TabsList>
 
           <!-- SDK Keys tab -->
@@ -90,6 +91,126 @@
                     </button>
                   </div>
                 </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <!-- Usage guide tab -->
+          <TabsContent value="usage" class="space-y-6 text-sm">
+            <!-- SDK Keys -->
+            <div class="space-y-3">
+              <div class="space-y-0.5">
+                <h2 class="text-sm font-semibold">{{ $t('keys.usageSdkTitle') }}</h2>
+                <p class="text-xs text-muted-foreground">{{ $t('keys.usageSdkDescription') }}</p>
+              </div>
+
+              <div class="space-y-2">
+                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {{ $t('keys.usagePollFlags') }}
+                </p>
+                <pre
+                  class="rounded-lg bg-muted px-4 py-3 text-[12px] font-mono overflow-x-auto leading-relaxed"
+                >
+GET /sdk/flags?sdk_key=YOUR_SDK_KEY</pre
+                >
+              </div>
+
+              <div class="space-y-2">
+                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {{ $t('keys.usageEvaluate') }}
+                </p>
+                <pre
+                  class="rounded-lg bg-muted px-4 py-3 text-[12px] font-mono overflow-x-auto leading-relaxed"
+                >
+POST /sdk/evaluate?sdk_key=YOUR_SDK_KEY
+Content-Type: application/json
+
+{
+  "flag_key": "my-feature",
+  "user_key": "user-123",
+  "attributes": {
+    "plan": "pro",
+    "email": "alice@example.com"
+  }
+}</pre
+                >
+              </div>
+
+              <div class="space-y-2">
+                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {{ $t('keys.usageStream') }}
+                </p>
+                <pre
+                  class="rounded-lg bg-muted px-4 py-3 text-[12px] font-mono overflow-x-auto leading-relaxed"
+                >
+GET /sdk/stream?sdk_key=YOUR_SDK_KEY
+Accept: text/event-stream</pre
+                >
+                <p class="text-xs text-muted-foreground">{{ $t('keys.usageStreamNote') }}</p>
+              </div>
+            </div>
+
+            <Separator />
+
+            <!-- API Keys -->
+            <div class="space-y-3">
+              <div class="space-y-0.5">
+                <h2 class="text-sm font-semibold">{{ $t('keys.usageApiTitle') }}</h2>
+                <p class="text-xs text-muted-foreground">{{ $t('keys.usageApiDescription') }}</p>
+              </div>
+
+              <div class="space-y-2">
+                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {{ $t('keys.usageListFlags') }}
+                </p>
+                <pre
+                  class="rounded-lg bg-muted px-4 py-3 text-[12px] font-mono overflow-x-auto leading-relaxed"
+                >
+GET /api/projects/{{ projectStore.current!.id }}/flags
+Authorization: Bearer YOUR_API_KEY</pre
+                >
+              </div>
+
+              <div class="space-y-2">
+                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {{ $t('keys.usageToggleFlag') }}
+                </p>
+                <pre
+                  class="rounded-lg bg-muted px-4 py-3 text-[12px] font-mono overflow-x-auto leading-relaxed"
+                >
+PATCH /api/projects/{{ projectStore.current!.id }}/flags/FLAG_KEY/env
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+
+{
+  "environment_id": 1,
+  "enabled": true,
+  "default_variation": 0
+}</pre
+                >
+              </div>
+
+              <div class="space-y-2">
+                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {{ $t('keys.usageCreateFlag') }}
+                </p>
+                <pre
+                  class="rounded-lg bg-muted px-4 py-3 text-[12px] font-mono overflow-x-auto leading-relaxed"
+                >
+POST /api/projects/{{ projectStore.current!.id }}/flags
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+
+{
+  "name": "My Feature",
+  "key": "my-feature",
+  "flag_type": "boolean",
+  "variations": [
+    { "name": "on",  "value": true },
+    { "name": "off", "value": false }
+  ]
+}</pre
+                >
               </div>
             </div>
           </TabsContent>
