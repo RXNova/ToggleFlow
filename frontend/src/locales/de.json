@@ -181,7 +181,9 @@
     "editTitle": "Benutzer bearbeiten",
     "editDescription": "Name oder Rolle des Benutzers ändern.",
     "deleteTitle": "Benutzer entfernen",
-    "you": "Sie"
+    "you": "Sie",
+    "history": "Benutzerverlauf",
+    "historyTitle": "Benutzerverlauf"
   },
   "members": {
     "title": "Mitglieder",

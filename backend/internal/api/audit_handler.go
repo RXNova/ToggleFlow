@@ -48,6 +48,36 @@ func (h *handler) ListAudit(c *fiber.Ctx) error {
 	return c.JSON(Page[db.AuditEntry]{Data: entries, Total: total, Limit: pq.Limit, Offset: pq.Offset})
 }
 
+func (h *handler) ListUserAudit(c *fiber.Ctx) error {
+	targetID, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid user id"})
+	}
+
+	ctx := context.Background()
+	var user db.User
+	if err := h.db.NewSelect().Model(&user).Column("id", "email").Where("id = ?", targetID).Scan(ctx); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
+	}
+
+	pq := parsePage(c)
+	q := h.db.NewSelect().Model((*db.AuditEntry)(nil)).
+		Where("resource = ?", user.Email).
+		OrderExpr("created_at DESC")
+
+	total, err := q.Count(ctx)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "failed to count audit entries"})
+	}
+
+	entries := make([]db.AuditEntry, 0)
+	if err := q.Limit(pq.Limit).Offset(pq.Offset).Scan(ctx, &entries); err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "failed to fetch audit entries"})
+	}
+
+	return c.JSON(Page[db.AuditEntry]{Data: entries, Total: total, Limit: pq.Limit, Offset: pq.Offset})
+}
+
 // writeAudit records a change. Errors are silently dropped — audit failures must
 // never break the primary operation.
 func (h *handler) writeAudit(projectID int64, actor, action, resource, oldVal, newVal string) {

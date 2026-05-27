@@ -15,3 +15,8 @@ export const auditApi = {
   list: (projectId: number, params?: PageParams & { resource?: string; actor?: string }) =>
     api.get<PageResult<AuditEntry>>(`/projects/${projectId}/audit`, params),
 }
+
+export const userAuditApi = {
+  list: (userId: number, params?: PageParams) =>
+    api.get<PageResult<AuditEntry>>(`/users/${userId}/audit`, params),
+}

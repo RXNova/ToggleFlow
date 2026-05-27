@@ -74,6 +74,14 @@
               <span class="text-xs text-muted-foreground mr-2">
                 <CalendarDays class="inline size-3 mr-0.5" />{{ timeAgo(user.created_at) }}
               </span>
+              <Tooltip v-if="authStore.isAdmin" :text="$t('users.history')">
+                <button
+                  class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  @click="openHistory(user)"
+                >
+                  <History class="size-3.5" />
+                </button>
+              </Tooltip>
               <Tooltip v-if="canEdit(user)" :text="$t('common.edit')">
                 <button
                   class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -118,6 +126,13 @@
   <DeleteUserDialog v-model:open="deleteDialogOpen" :user="deleteTarget" @deleted="onDeleted" />
   <ResetLinkDialog v-model:open="resetDialogOpen" :user="resetTarget" />
   <ReinviteDialog v-model:open="reinviteDialogOpen" :user="reinviteTarget" />
+  <AuditHistorySheet
+    v-if="historyTarget"
+    v-model:open="historyOpen"
+    :user-id="historyTarget.id"
+    :title="$t('users.historyTitle')"
+    :label="historyTarget.email"
+  />
 </template>
 
 <script setup lang="ts">
@@ -131,6 +146,7 @@ import {
   CalendarDays,
   KeyRound,
   RotateCcw,
+  History,
 } from '@lucide/vue'
 import { Tooltip } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
@@ -143,6 +159,7 @@ import EditUserDialog from '@/components/EditUserDialog.vue'
 import DeleteUserDialog from '@/components/DeleteUserDialog.vue'
 import ResetLinkDialog from '@/components/ResetLinkDialog.vue'
 import ReinviteDialog from '@/components/ReinviteDialog.vue'
+import AuditHistorySheet from '@/components/AuditHistorySheet.vue'
 
 const authStore = useAuthStore()
 const users = ref<User[]>([])
@@ -156,6 +173,8 @@ const resetDialogOpen = ref(false)
 const resetTarget = ref<User | null>(null)
 const reinviteDialogOpen = ref(false)
 const reinviteTarget = ref<User | null>(null)
+const historyOpen = ref(false)
+const historyTarget = ref<User | null>(null)
 
 const roleRank: Record<Role, number> = {
   superuser: 5,
@@ -234,6 +253,11 @@ function openReset(user: User) {
 function openReinvite(user: User) {
   reinviteTarget.value = user
   reinviteDialogOpen.value = true
+}
+
+function openHistory(user: User) {
+  historyTarget.value = user
+  historyOpen.value = true
 }
 
 function onCreated(user: User) {

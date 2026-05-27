@@ -32,6 +32,7 @@ func Register(app *fiber.App, database *bun.DB, broker *stream.Broker) {
 	users.Post("/", h.CreateUser)
 	users.Patch("/:id", h.UpdateUser)
 	users.Post("/:id/reinvite", h.ReinviteUser)
+	users.Get("/:id/audit", h.ListUserAudit)
 
 	// Delete user and reset link — Superuser only
 	protected.Delete("/users/:id", auth.RequireRole(db.RoleSuperuser), h.DeleteUser)

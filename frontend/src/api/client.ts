@@ -11,6 +11,7 @@ export interface PageParams {
   limit?: number
   offset?: number
   search?: string
+  [key: string]: string | number | undefined
 }
 
 export class ApiError extends Error {

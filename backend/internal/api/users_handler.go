@@ -96,6 +96,9 @@ func (h *handler) CreateUser(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "failed to create user"})
 	}
 
+	h.writeAudit(0, h.actorName(c), "user.created", user.Email, "",
+		toJSON(map[string]any{"name": user.Name, "email": user.Email, "role": string(user.Role)}))
+
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"user":          user,
 		"welcome_token": plainToken,
@@ -129,6 +132,8 @@ func (h *handler) UpdateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid body"})
 	}
 
+	oldName, oldEmail, oldRole := target.Name, target.Email, target.Role
+
 	if req.Name != "" {
 		target.Name = req.Name
 	}
@@ -160,6 +165,10 @@ func (h *handler) UpdateUser(c *fiber.Ctx) error {
 	if _, err := h.db.NewUpdate().Model(&target).WherePK().Exec(context.Background()); err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "failed to update user"})
 	}
+
+	h.writeAudit(0, h.actorName(c), "user.updated", target.Email,
+		toJSON(map[string]any{"name": oldName, "email": oldEmail, "role": string(oldRole)}),
+		toJSON(map[string]any{"name": target.Name, "email": target.Email, "role": string(target.Role)}))
 
 	return c.JSON(target)
 }
@@ -282,9 +291,18 @@ func (h *handler) DeleteUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "cannot delete your own account"})
 	}
 
-	if _, err := h.db.NewDelete().Model((*db.User)(nil)).Where("id = ?", targetID).Exec(context.Background()); err != nil {
+	ctx := context.Background()
+	var target db.User
+	if err := h.db.NewSelect().Model(&target).Where("id = ?", targetID).Scan(ctx); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
+	}
+
+	if _, err := h.db.NewDelete().Model((*db.User)(nil)).Where("id = ?", targetID).Exec(ctx); err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "failed to delete user"})
 	}
+
+	h.writeAudit(0, h.actorName(c), "user.deleted", target.Email,
+		toJSON(map[string]any{"name": target.Name, "email": target.Email, "role": string(target.Role)}), "")
 
 	return c.SendStatus(fiber.StatusNoContent)
 }

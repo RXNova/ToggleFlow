@@ -108,16 +108,17 @@ import {
   DialogTitle,
 } from 'reka-ui'
 import Pagination from '@/components/ui/pagination/Pagination.vue'
-import { auditApi, type AuditEntry } from '@/api/audit'
+import { auditApi, userAuditApi, type AuditEntry } from '@/api/audit'
 import { timeAgo } from '@/lib/utils'
 
 const props = defineProps<{
   open: boolean
-  projectId: number
-  // resource filters by audit resource column (flag key or env key)
+  // projectId + resource/actor for flag and environment history
+  projectId?: number
   resource?: string
-  // actor filters by who performed the action (for user activity history)
   actor?: string
+  // userId for user account history (uses a separate endpoint)
+  userId?: number
   title: string
   label: string
 }>()
@@ -133,15 +134,18 @@ const limit = ref(LIMIT)
 const loading = ref(false)
 
 async function load() {
-  if (!props.projectId) return
   loading.value = true
   try {
-    const res = await auditApi.list(props.projectId, {
-      limit: limit.value,
-      offset: (page.value - 1) * limit.value,
-      resource: props.resource,
-      actor: props.actor,
-    })
+    const offset = (page.value - 1) * limit.value
+    const res =
+      props.userId != null
+        ? await userAuditApi.list(props.userId, { limit: limit.value, offset })
+        : await auditApi.list(props.projectId!, {
+            limit: limit.value,
+            offset,
+            resource: props.resource,
+            actor: props.actor,
+          })
     entries.value = res.data ?? []
     total.value = res.total
   } finally {

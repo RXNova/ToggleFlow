@@ -181,7 +181,9 @@
     "editTitle": "Edit user",
     "editDescription": "Update the user's name or role.",
     "deleteTitle": "Remove user",
-    "you": "you"
+    "you": "you",
+    "history": "User history",
+    "historyTitle": "User history"
   },
   "members": {
     "title": "Members",
