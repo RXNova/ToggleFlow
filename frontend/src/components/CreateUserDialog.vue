@@ -128,7 +128,6 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { AlertCircle, Loader2, Copy, Check } from '@lucide/vue'
 import {
   Dialog,
@@ -145,8 +144,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { usersApi, type User, type Role } from '@/api/users'
 import { useAuthStore } from '@/stores/auth'
 import { Tooltip } from '@/components/ui/tooltip'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
-const { t } = useI18n()
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{
   'update:open': [value: boolean]
@@ -160,8 +159,7 @@ const name = ref('')
 const email = ref('')
 const role = ref<Role>('viewer')
 const expiryDays = ref(7)
-const loading = ref(false)
-const error = ref('')
+const { loading, error, run } = useAsyncAction()
 const welcomeToken = ref('')
 const copied = ref<'link' | 'secret' | null>(null)
 
@@ -197,19 +195,13 @@ function onOpenChange(v: boolean) {
 }
 
 async function submit() {
-  error.value = ''
-  loading.value = true
-  try {
+  await run(async () => {
     const result = await usersApi.create(name.value, email.value, role.value, expiryDays.value)
     emit('created', result.user)
     welcomeToken.value = result.welcome_token
     inviteUUID.value = result.user.uuid
     phase.value = 'success'
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
 
 async function copy(text: string, which: 'link' | 'secret') {

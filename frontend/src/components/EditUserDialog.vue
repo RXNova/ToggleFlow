@@ -70,7 +70,6 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { AlertCircle, Loader2 } from '@lucide/vue'
 import {
   Dialog,
@@ -86,8 +85,8 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { usersApi, type User, type Role } from '@/api/users'
 import { useAuthStore } from '@/stores/auth'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
-const { t } = useI18n()
 const props = defineProps<{ open: boolean; user: User | null }>()
 const emit = defineEmits<{
   'update:open': [value: boolean]
@@ -99,8 +98,7 @@ const authStore = useAuthStore()
 const name = ref('')
 const email = ref('')
 const role = ref<Role>('viewer')
-const loading = ref(false)
-const error = ref('')
+const { loading, error, run } = useAsyncAction()
 
 const isSelfSuperuser = computed(
   () => authStore.isSuperuser && props.user?.id === authStore.user?.id
@@ -127,20 +125,14 @@ watch(
 
 async function submit() {
   if (!props.user) return
-  error.value = ''
-  loading.value = true
-  try {
-    const updated = await usersApi.update(props.user.id, {
+  await run(async () => {
+    const updated = await usersApi.update(props.user!.id, {
       name: name.value,
       email: email.value,
       role: role.value,
     })
     emit('updated', updated)
     emit('update:open', false)
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
 </script>

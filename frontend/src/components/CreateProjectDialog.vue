@@ -62,7 +62,6 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { AlertCircle, Loader2 } from '@lucide/vue'
 import {
   Dialog,
@@ -77,8 +76,8 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { projectsApi, type Project } from '@/api/projects'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
-const { t } = useI18n()
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{
   'update:open': [value: boolean]
@@ -89,8 +88,7 @@ const name = ref('')
 const keyRaw = ref('')
 const keyTouched = ref(false)
 const description = ref('')
-const loading = ref(false)
-const error = ref('')
+const { loading, error, run } = useAsyncAction()
 
 // Computed setter sanitizes every keystroke: lowercase, a-z 0-9 hyphens only
 const key = computed({
@@ -107,7 +105,6 @@ function slugify(s: string) {
     .replace(/^-|-$/g, '')
 }
 
-// Auto-populate slug from name until user touches the slug field
 watch(name, (v: string) => {
   if (!keyTouched.value) keyRaw.value = slugify(v)
 })
@@ -126,16 +123,10 @@ watch(
 )
 
 async function submit() {
-  error.value = ''
-  loading.value = true
-  try {
+  await run(async () => {
     const project = await projectsApi.create(name.value, key.value, description.value)
     emit('created', project)
     emit('update:open', false)
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
 </script>

@@ -75,8 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { ref, watch } from 'vue'
 import { TriangleAlert, AlertCircle, Loader2 } from '@lucide/vue'
 import {
   Dialog,
@@ -91,8 +90,9 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { projectsApi, type Project } from '@/api/projects'
+import { useCountdown } from '@/composables/useCountdown'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
-const { t } = useI18n()
 const props = defineProps<{ open: boolean; project: Project | null }>()
 const emit = defineEmits<{
   'update:open': [value: boolean]
@@ -100,10 +100,8 @@ const emit = defineEmits<{
 }>()
 
 const confirmation = ref('')
-const loading = ref(false)
-const error = ref('')
-const countdown = ref(0)
-let countdownTimer: ReturnType<typeof setInterval> | null = null
+const { countdown } = useCountdown(() => props.open, 10)
+const { loading, error, run } = useAsyncAction()
 
 watch(
   () => props.open,
@@ -111,39 +109,16 @@ watch(
     if (v) {
       confirmation.value = ''
       error.value = ''
-      countdown.value = 10
-      countdownTimer = setInterval(() => {
-        countdown.value--
-        if (countdown.value <= 0) {
-          clearInterval(countdownTimer!)
-          countdownTimer = null
-        }
-      }, 1000)
-    } else {
-      if (countdownTimer) {
-        clearInterval(countdownTimer)
-        countdownTimer = null
-      }
     }
   }
 )
 
-onUnmounted(() => {
-  if (countdownTimer) clearInterval(countdownTimer)
-})
-
 async function submit() {
   if (!props.project || confirmation.value !== props.project.name) return
-  error.value = ''
-  loading.value = true
-  try {
-    await projectsApi.delete(props.project.id)
-    emit('deleted', props.project)
+  await run(async () => {
+    await projectsApi.delete(props.project!.id)
+    emit('deleted', props.project!)
     emit('update:open', false)
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
 </script>

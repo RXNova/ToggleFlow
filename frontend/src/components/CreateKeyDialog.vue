@@ -84,7 +84,6 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { AlertCircle, Loader2, Copy, Check } from '@lucide/vue'
 import {
   Dialog,
@@ -98,6 +97,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
 const props = defineProps<{
   open: boolean
@@ -111,14 +111,11 @@ const emit = defineEmits<{
   created: []
 }>()
 
-const { t } = useI18n()
-
 const phase = ref<'form' | 'success'>('form')
 const label = ref('')
 const expiryPreset = ref('never')
 const customDate = ref('')
-const loading = ref(false)
-const error = ref('')
+const { loading, error, run } = useAsyncAction()
 const createdKey = ref('')
 const copied = ref(false)
 
@@ -153,16 +150,10 @@ watch(
 )
 
 async function submit() {
-  error.value = ''
-  loading.value = true
-  try {
+  await run(async () => {
     createdKey.value = await props.onCreate(label.value.trim(), expiresAt.value)
     phase.value = 'success'
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
 
 function copy() {

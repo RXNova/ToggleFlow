@@ -82,7 +82,6 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { AlertCircle, Loader2 } from '@lucide/vue'
 import {
   Dialog,
@@ -97,8 +96,8 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { environmentsApi, type Environment } from '@/api/environments'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
-const { t } = useI18n()
 const props = defineProps<{ open: boolean; environment: Environment | null; projectId: number }>()
 const emit = defineEmits<{
   'update:open': [value: boolean]
@@ -110,8 +109,7 @@ const keyRaw = ref('')
 const keyTouched = ref(false)
 const description = ref('')
 const isProtected = ref(false)
-const loading = ref(false)
-const error = ref('')
+const { loading, error, run } = useAsyncAction()
 
 const key = computed({
   get: () => keyRaw.value,
@@ -147,12 +145,10 @@ watch(
 
 async function submit() {
   if (!props.environment) return
-  error.value = ''
-  loading.value = true
-  try {
+  await run(async () => {
     const updated = await environmentsApi.update(
       props.projectId,
-      props.environment.id,
+      props.environment!.id,
       name.value,
       key.value,
       description.value,
@@ -160,10 +156,6 @@ async function submit() {
     )
     emit('updated', updated)
     emit('update:open', false)
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
 </script>

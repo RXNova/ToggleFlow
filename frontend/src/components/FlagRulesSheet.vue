@@ -339,6 +339,7 @@ import {
   type RolloutStep,
 } from '@/api/flags'
 import { segmentsApi, type Segment } from '@/api/segments'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
 const props = defineProps<{
   open: boolean
@@ -356,8 +357,7 @@ const { t } = useI18n()
 
 const rules = ref<Rule[]>([])
 const segments = ref<Segment[]>([])
-const saving = ref(false)
-const error = ref('')
+const { loading: saving, error, run } = useAsyncAction()
 
 // tagInputRefs[ruleIndex][conditionIndex] = input element
 const tagInputRefs = ref<Record<string, HTMLInputElement | null>>({})
@@ -502,8 +502,7 @@ async function save() {
       }
     }
   }
-  saving.value = true
-  try {
+  await run(async () => {
     await flagsApi.saveRules(
       props.projectId,
       props.flag.key,
@@ -512,10 +511,6 @@ async function save() {
     )
     emit('saved', rules.value)
     emit('update:open', false)
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    saving.value = false
-  }
+  })
 }
 </script>

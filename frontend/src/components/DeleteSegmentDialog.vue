@@ -46,8 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { watch } from 'vue'
 import { TriangleAlert, AlertCircle, Loader2 } from '@lucide/vue'
 import {
   Dialog,
@@ -60,57 +59,31 @@ import {
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { segmentsApi, type Segment } from '@/api/segments'
+import { useCountdown } from '@/composables/useCountdown'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
-const { t } = useI18n()
 const props = defineProps<{ open: boolean; segment: Segment | null; projectId: number }>()
 const emit = defineEmits<{
   'update:open': [value: boolean]
   deleted: [segment: Segment]
 }>()
 
-const loading = ref(false)
-const error = ref('')
-const countdown = ref(0)
-let timer: ReturnType<typeof setInterval> | null = null
+const { countdown } = useCountdown(() => props.open, 5)
+const { loading, error, run } = useAsyncAction()
 
 watch(
   () => props.open,
   (v) => {
-    if (v) {
-      error.value = ''
-      countdown.value = 5
-      timer = setInterval(() => {
-        countdown.value--
-        if (countdown.value <= 0) {
-          clearInterval(timer!)
-          timer = null
-        }
-      }, 1000)
-    } else {
-      if (timer) {
-        clearInterval(timer)
-        timer = null
-      }
-    }
+    if (v) error.value = ''
   }
 )
 
-onUnmounted(() => {
-  if (timer) clearInterval(timer)
-})
-
 async function submit() {
   if (!props.segment) return
-  error.value = ''
-  loading.value = true
-  try {
-    await segmentsApi.delete(props.projectId, props.segment.id)
-    emit('deleted', props.segment)
+  await run(async () => {
+    await segmentsApi.delete(props.projectId, props.segment!.id)
+    emit('deleted', props.segment!)
     emit('update:open', false)
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
 </script>

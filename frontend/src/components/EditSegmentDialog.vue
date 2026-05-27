@@ -82,6 +82,8 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { segmentsApi, type Segment } from '@/api/segments'
+import { useTagInput } from '@/composables/useTagInput'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
 const { t } = useI18n()
 const props = defineProps<{ open: boolean; projectId: number; segment: Segment | null }>()
@@ -91,10 +93,8 @@ const emit = defineEmits<{
 }>()
 
 const name = ref('')
-const values = ref<(string | number)[]>([])
-const tagInputEl = ref<HTMLInputElement | null>(null)
-const loading = ref(false)
-const error = ref('')
+const { values, tagInputEl, addTag, removeTag, onBackspace, onPaste } = useTagInput()
+const { loading, error, run } = useAsyncAction()
 
 watch(
   () => props.open,
@@ -107,64 +107,19 @@ watch(
   }
 )
 
-function parseValue(raw: string): string | number {
-  const n = Number(raw)
-  return !isNaN(n) && raw.trim() !== '' ? n : raw
-}
-
-function addTag(e: Event) {
-  const input = e.target as HTMLInputElement
-  const val = input.value.trim()
-  if (val && !values.value.includes(parseValue(val))) {
-    values.value.push(parseValue(val))
-  }
-  input.value = ''
-}
-
-function removeTag(vi: number) {
-  values.value.splice(vi, 1)
-}
-
-function onBackspace(e: KeyboardEvent) {
-  const input = e.target as HTMLInputElement
-  if (input.value === '' && values.value.length > 0) values.value.pop()
-}
-
-function onPaste(e: ClipboardEvent) {
-  const pasted = e.clipboardData?.getData('text') ?? ''
-  if (!pasted.includes(',') && !pasted.includes('\n')) return
-  e.preventDefault()
-  const input = e.target as HTMLInputElement
-  const parts = (input.value + pasted)
-    .split(/[,\n]/)
-    .map((s) => s.trim())
-    .filter(Boolean)
-  for (const part of parts) {
-    const parsed = parseValue(part)
-    if (!values.value.includes(parsed)) values.value.push(parsed)
-  }
-  input.value = ''
-}
-
 async function submit() {
   if (!name.value.trim()) {
     error.value = t('segments.errorName')
     return
   }
   if (!props.segment) return
-  error.value = ''
-  loading.value = true
-  try {
-    const updated = await segmentsApi.update(props.projectId, props.segment.id, {
+  await run(async () => {
+    const updated = await segmentsApi.update(props.projectId, props.segment!.id, {
       name: name.value.trim(),
       values: values.value,
     })
     emit('updated', updated)
     emit('update:open', false)
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
 </script>

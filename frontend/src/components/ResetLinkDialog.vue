@@ -72,7 +72,6 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { AlertCircle, Loader2, Copy, Check } from '@lucide/vue'
 import {
   Dialog,
@@ -88,14 +87,13 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { usersApi, type User } from '@/api/users'
 import { Tooltip } from '@/components/ui/tooltip'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
-const { t } = useI18n()
 const props = defineProps<{ open: boolean; user: User | null }>()
 const emit = defineEmits<{ 'update:open': [value: boolean] }>()
 
 const phase = ref<'confirm' | 'success'>('confirm')
-const loading = ref(false)
-const error = ref('')
+const { loading, error, run } = useAsyncAction()
 const resetToken = ref('')
 const copied = ref<'link' | 'secret' | null>(null)
 
@@ -120,18 +118,12 @@ function onOpenChange(v: boolean) {
 
 async function generate() {
   if (!props.user) return
-  error.value = ''
-  loading.value = true
-  try {
-    const result = await usersApi.generateResetLink(props.user.id)
+  await run(async () => {
+    const result = await usersApi.generateResetLink(props.user!.id)
     resetToken.value = result.reset_token
     resetLink.value = `${window.location.origin}/reset?id=${result.user.uuid}`
     phase.value = 'success'
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
 
 async function copy(text: string, which: 'link' | 'secret') {

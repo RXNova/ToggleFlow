@@ -94,7 +94,6 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { AlertCircle, Loader2, Copy, Check } from '@lucide/vue'
 import {
   Dialog,
@@ -109,15 +108,14 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { usersApi, type User } from '@/api/users'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
-const { t } = useI18n()
 const props = defineProps<{ open: boolean; user: User | null }>()
 const emit = defineEmits<{ 'update:open': [value: boolean] }>()
 
 const phase = ref<'form' | 'success'>('form')
 const expiryDays = ref(7)
-const loading = ref(false)
-const error = ref('')
+const { loading, error, run } = useAsyncAction()
 const welcomeToken = ref('')
 const welcomeLink = ref('')
 const copied = ref<'link' | 'secret' | null>(null)
@@ -142,18 +140,12 @@ function onOpenChange(v: boolean) {
 
 async function generate() {
   if (!props.user) return
-  error.value = ''
-  loading.value = true
-  try {
-    const result = await usersApi.reinvite(props.user.id, expiryDays.value)
+  await run(async () => {
+    const result = await usersApi.reinvite(props.user!.id, expiryDays.value)
     welcomeToken.value = result.welcome_token
     welcomeLink.value = `${window.location.origin}/activate?id=${result.user.uuid}`
     phase.value = 'success'
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
 
 async function copy(text: string, which: 'link' | 'secret') {

@@ -46,8 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { watch } from 'vue'
 import { TriangleAlert, AlertCircle, Loader2 } from '@lucide/vue'
 import {
   Dialog,
@@ -60,57 +59,31 @@ import {
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { environmentsApi, type Environment } from '@/api/environments'
+import { useCountdown } from '@/composables/useCountdown'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
-const { t } = useI18n()
 const props = defineProps<{ open: boolean; environment: Environment | null; projectId: number }>()
 const emit = defineEmits<{
   'update:open': [value: boolean]
   deleted: [environment: Environment]
 }>()
 
-const loading = ref(false)
-const error = ref('')
-const countdown = ref(0)
-let countdownTimer: ReturnType<typeof setInterval> | null = null
+const { countdown } = useCountdown(() => props.open, 10)
+const { loading, error, run } = useAsyncAction()
 
 watch(
   () => props.open,
   (v) => {
-    if (v) {
-      error.value = ''
-      countdown.value = 10
-      countdownTimer = setInterval(() => {
-        countdown.value--
-        if (countdown.value <= 0) {
-          clearInterval(countdownTimer!)
-          countdownTimer = null
-        }
-      }, 1000)
-    } else {
-      if (countdownTimer) {
-        clearInterval(countdownTimer)
-        countdownTimer = null
-      }
-    }
+    if (v) error.value = ''
   }
 )
 
-onUnmounted(() => {
-  if (countdownTimer) clearInterval(countdownTimer)
-})
-
 async function submit() {
   if (!props.environment) return
-  error.value = ''
-  loading.value = true
-  try {
-    await environmentsApi.delete(props.projectId, props.environment.id)
-    emit('deleted', props.environment)
+  await run(async () => {
+    await environmentsApi.delete(props.projectId, props.environment!.id)
+    emit('deleted', props.environment!)
     emit('update:open', false)
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
 </script>

@@ -102,7 +102,6 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { AlertCircle, Loader2, Plus, X } from '@lucide/vue'
 import {
   Dialog,
@@ -117,8 +116,8 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { flagsApi, type Flag, type Variation } from '@/api/flags'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
-const { t } = useI18n()
 const props = defineProps<{ open: boolean; flag: Flag | null; projectId: number }>()
 const emit = defineEmits<{
   'update:open': [value: boolean]
@@ -127,8 +126,7 @@ const emit = defineEmits<{
 
 const name = ref('')
 const description = ref('')
-const loading = ref(false)
-const error = ref('')
+const { loading, error, run } = useAsyncAction()
 
 interface VariationForm {
   name: string
@@ -184,20 +182,14 @@ function coerceVariations(): Variation[] {
 
 async function submit() {
   if (!props.flag) return
-  error.value = ''
-  loading.value = true
-  try {
-    const updated = await flagsApi.update(props.projectId, props.flag.key, {
+  await run(async () => {
+    const updated = await flagsApi.update(props.projectId, props.flag!.key, {
       name: name.value,
       description: description.value,
       variations: coerceVariations(),
     })
     emit('updated', updated)
     emit('update:open', false)
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
 </script>

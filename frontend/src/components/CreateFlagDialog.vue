@@ -139,7 +139,6 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { AlertCircle, Loader2, Plus, X } from '@lucide/vue'
 import {
   Dialog,
@@ -154,8 +153,8 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { flagsApi, type Flag, type FlagType, type Variation } from '@/api/flags'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
-const { t } = useI18n()
 const FLAG_TYPES: FlagType[] = ['boolean', 'string', 'number', 'json']
 
 const props = defineProps<{ open: boolean; projectId: number }>()
@@ -168,8 +167,7 @@ const name = ref('')
 const key = ref('')
 const description = ref('')
 const flagType = ref<FlagType>('boolean')
-const loading = ref(false)
-const error = ref('')
+const { loading, error, run } = useAsyncAction()
 let keyTouched = false
 
 // Each variation in the form is {name, value} where value is always a string
@@ -263,9 +261,7 @@ function coerceVariations(): Variation[] {
 }
 
 async function submit() {
-  error.value = ''
-  loading.value = true
-  try {
+  await run(async () => {
     const flag = await flagsApi.create(props.projectId, {
       name: name.value,
       key: key.value,
@@ -275,10 +271,6 @@ async function submit() {
     })
     emit('created', flag)
     emit('update:open', false)
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : t('common.error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
 </script>
