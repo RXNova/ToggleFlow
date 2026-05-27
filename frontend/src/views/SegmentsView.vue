@@ -28,14 +28,14 @@
       </div>
 
       <!-- Body -->
-      <div class="flex min-h-0 flex-1 flex-col overflow-hidden px-6 pb-6">
-        <div v-if="loading" class="flex flex-1 items-center justify-center">
+      <div class="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
+        <div v-if="loading" class="flex h-full items-center justify-center">
           <Loader2 class="size-6 animate-spin text-muted-foreground/40" />
         </div>
 
         <div
           v-else-if="segments.length === 0"
-          class="flex flex-1 flex-col items-center justify-center text-center"
+          class="flex h-full flex-col items-center justify-center text-center"
         >
           <Users class="size-8 text-muted-foreground/30 mb-3" />
           <p class="text-sm font-medium">{{ $t('segments.emptyTitle') }}</p>
@@ -44,7 +44,7 @@
           </p>
         </div>
 
-        <div v-else class="section-segments min-h-0 flex-1 overflow-y-auto space-y-2">
+        <div v-else class="section-segments space-y-2">
           <div v-for="seg in segments" :key="seg.id" class="rounded-lg border bg-card p-4">
             <div class="flex items-start justify-between gap-4">
               <div class="min-w-0 flex-1">
