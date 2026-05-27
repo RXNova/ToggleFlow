@@ -47,7 +47,7 @@
           class="flex flex-1 flex-col items-center justify-center text-center"
         >
           <SearchX class="size-8 text-muted-foreground/30 mb-3" />
-          <p class="text-sm font-medium">No flags match your search</p>
+          <p class="text-sm font-medium">{{ $t('flags.noResults') }}</p>
         </div>
 
         <div
@@ -233,6 +233,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { watchDebounced } from '@vueuse/core'
 import {
   Flag as FlagIcon,
@@ -253,6 +254,7 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import Pagination from '@/components/ui/pagination/Pagination.vue'
 import { useProjectStore } from '@/stores/project'
+import { useToastStore } from '@/stores/toast'
 import { flagsApi, type Flag, type FlagEnvState } from '@/api/flags'
 import { useAuthStore } from '@/stores/auth'
 import { timeAgo } from '@/lib/utils'
@@ -265,6 +267,7 @@ import CopyKey from '@/components/CopyKey.vue'
 
 const LIMIT = 20
 
+const { t } = useI18n()
 const projectStore = useProjectStore()
 const authStore = useAuthStore()
 const flags = ref<Flag[]>([])
@@ -377,6 +380,7 @@ async function toggle(flag: Flag, env: FlagEnvState) {
     )
   } catch {
     env.enabled = prev
+    useToastStore().show(t('common.error'), 'error')
   } finally {
     delete toggling.value[k]
   }
@@ -397,6 +401,7 @@ async function changeDefaultVariation(flag: Flag, env: FlagEnvState, event: Even
     )
   } catch {
     env.default_variation = prev
+    useToastStore().show(t('common.error'), 'error')
   }
 }
 </script>

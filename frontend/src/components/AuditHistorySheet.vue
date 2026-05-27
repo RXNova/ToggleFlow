@@ -160,7 +160,8 @@ watch(
       page.value = 1
       load()
     }
-  }
+  },
+  { immediate: true }
 )
 
 function goTo(p: number) {

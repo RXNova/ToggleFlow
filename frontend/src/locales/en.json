@@ -89,6 +89,7 @@
     "createTitle": "Create flag",
     "createDescription": "Flags are evaluated per environment. Variations define the possible values.",
     "search": "Search flags...",
+    "noResults": "No flags match your search",
     "emptyTitle": "No feature flags yet",
     "emptyDescription": "Create your first flag to start rolling out features gradually.",
     "noEnvironments": "No environments — create one to enable this flag.",

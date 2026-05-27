@@ -89,6 +89,7 @@
     "createTitle": "Flag erstellen",
     "createDescription": "Flags werden pro Umgebung ausgewertet. Variationen definieren die möglichen Werte.",
     "search": "Flags suchen...",
+    "noResults": "Keine Flags gefunden",
     "emptyTitle": "Noch keine Feature-Flags",
     "emptyDescription": "Erstellen Sie Ihren ersten Flag, um Funktionen schrittweise bereitzustellen.",
     "noEnvironments": "Keine Umgebungen — erstellen Sie eine, um diesen Flag zu aktivieren.",
