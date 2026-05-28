@@ -310,6 +310,7 @@ func (h *handler) UpdateFlag(c *fiber.Ctx) error {
 		toJSON(map[string]any{"name": flag.Name, "description": flag.Description}))
 
 	h.broker.Publish(stream.Event{ProjectID: pid, FlagKey: flag.Key, Action: "updated"})
+	h.cache.bustProject(pid)
 
 	return c.JSON(parseFlagResponse(flag, nil))
 }
@@ -373,6 +374,7 @@ func (h *handler) ToggleFlagEnv(c *fiber.Ctx) error {
 		FlagKey:   flag.Key,
 		Action:    "updated",
 	})
+	h.cache.bust(pid, req.EnvironmentID)
 
 	return c.JSON(fiber.Map{"ok": true})
 }
@@ -422,6 +424,7 @@ func (h *handler) DeleteFlag(c *fiber.Ctx) error {
 		FlagKey:   flag.Key,
 		Action:    "deleted",
 	})
+	h.cache.bustProject(pid)
 
 	return c.SendStatus(fiber.StatusNoContent)
 }
@@ -476,6 +479,7 @@ func (h *handler) SaveFlagRules(c *fiber.Ctx) error {
 	}
 
 	h.broker.Publish(stream.Event{ProjectID: pid, EnvKey: env.Key, FlagKey: flag.Key, Action: "updated"})
+	h.cache.bust(pid, req.EnvironmentID)
 
 	return c.JSON(fiber.Map{"ok": true})
 }

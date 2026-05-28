@@ -50,10 +50,11 @@ func parsePage(c *fiber.Ctx) pageQuery {
 type handler struct {
 	db     *bun.DB
 	broker *stream.Broker
+	cache  *flagCache
 }
 
 func newHandler(db *bun.DB, broker *stream.Broker) *handler {
-	return &handler{db: db, broker: broker}
+	return &handler{db: db, broker: broker, cache: newFlagCache()}
 }
 
 // requireAuth is a Fiber middleware that accepts either a JWT or a project-scoped API key.
