@@ -3,6 +3,7 @@ package api
 import (
 	"bufio"
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -63,71 +64,75 @@ func (h *handler) SDKGetFlags(c *fiber.Ctx) error {
 		return nil
 	}
 
-	if cached := h.cache.get(env.ProjectID, env.ID); cached != nil {
-		c.Set("Content-Type", "application/json")
-		return c.Send(cached)
-	}
-
-	ctx := context.Background()
-	var flags []db.Flag
-	if err := h.db.NewSelect().Model(&flags).Where("project_id = ?", env.ProjectID).OrderExpr("created_at ASC").Scan(ctx); err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "failed to fetch flags"})
-	}
-
-	var result []SDKFlagConfig
-	if len(flags) > 0 {
-		flagIDs := make([]int64, len(flags))
-		for i, f := range flags {
-			flagIDs[i] = f.ID
+	data := h.cache.get(env.ProjectID, env.ID)
+	if data == nil {
+		ctx := context.Background()
+		var flags []db.Flag
+		if err := h.db.NewSelect().Model(&flags).Where("project_id = ?", env.ProjectID).OrderExpr("created_at ASC").Scan(ctx); err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "failed to fetch flags"})
 		}
 
-		var flagEnvs []db.FlagEnvironment
-		_ = h.db.NewSelect().Model(&flagEnvs).
-			Where("flag_id IN (?) AND environment_id = ?", bun.In(flagIDs), env.ID).
-			Scan(ctx)
+		var result []SDKFlagConfig
+		if len(flags) > 0 {
+			flagIDs := make([]int64, len(flags))
+			for i, f := range flags {
+				flagIDs[i] = f.ID
+			}
 
-		type feKey struct{ flagID int64 }
-		feMap := make(map[feKey]db.FlagEnvironment)
-		for _, fe := range flagEnvs {
-			feMap[feKey{fe.FlagID}] = fe
+			var flagEnvs []db.FlagEnvironment
+			_ = h.db.NewSelect().Model(&flagEnvs).
+				Where("flag_id IN (?) AND environment_id = ?", bun.In(flagIDs), env.ID).
+				Scan(ctx)
+
+			type feKey struct{ flagID int64 }
+			feMap := make(map[feKey]db.FlagEnvironment)
+			for _, fe := range flagEnvs {
+				feMap[feKey{fe.FlagID}] = fe
+			}
+
+			result = make([]SDKFlagConfig, len(flags))
+			for i, flag := range flags {
+				var variations []Variation
+				if flag.Variations != "" && flag.Variations != "[]" {
+					_ = json.Unmarshal([]byte(flag.Variations), &variations)
+				}
+				if variations == nil {
+					variations = []Variation{}
+				}
+
+				fe := feMap[feKey{flag.ID}]
+
+				rules := json.RawMessage(`[]`)
+				if fe.Rules != "" {
+					rules = json.RawMessage(fe.Rules)
+				}
+
+				result[i] = SDKFlagConfig{
+					Key:              flag.Key,
+					FlagType:         flag.FlagType,
+					Enabled:          fe.Enabled,
+					Variations:       variations,
+					DefaultVariation: fe.DefaultVariation,
+					Rules:            rules,
+				}
+			}
+		} else {
+			result = []SDKFlagConfig{}
 		}
 
-		result = make([]SDKFlagConfig, len(flags))
-		for i, flag := range flags {
-			var variations []Variation
-			if flag.Variations != "" && flag.Variations != "[]" {
-				_ = json.Unmarshal([]byte(flag.Variations), &variations)
-			}
-			if variations == nil {
-				variations = []Variation{}
-			}
-
-			fe := feMap[feKey{flag.ID}]
-
-			rules := json.RawMessage(`[]`)
-			if fe.Rules != "" {
-				rules = json.RawMessage(fe.Rules)
-			}
-
-			result[i] = SDKFlagConfig{
-				Key:              flag.Key,
-				FlagType:         flag.FlagType,
-				Enabled:          fe.Enabled,
-				Variations:       variations,
-				DefaultVariation: fe.DefaultVariation,
-				Rules:            rules,
-			}
+		var merr error
+		data, merr = json.Marshal(result)
+		if merr != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "failed to encode flags"})
 		}
-	} else {
-		result = []SDKFlagConfig{}
+		h.cache.set(env.ProjectID, env.ID, data)
 	}
 
-	data, err := json.Marshal(result)
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "failed to encode flags"})
+	etag := fmt.Sprintf(`"%x"`, sha256.Sum256(data))
+	if c.Get("If-None-Match") == etag {
+		return c.SendStatus(fiber.StatusNotModified)
 	}
-	h.cache.set(env.ProjectID, env.ID, data)
-
+	c.Set("ETag", etag)
 	c.Set("Content-Type", "application/json")
 	return c.Send(data)
 }
