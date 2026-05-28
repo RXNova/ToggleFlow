@@ -260,11 +260,18 @@ Vite proxies `/api` and `/sdk` to `localhost:8080` during development, so the fr
 
 ---
 
+## SDKs
+
+| Language | Repository | Package |
+|---|---|---|
+| JavaScript / TypeScript | [toggle-flow/js-sdk](https://github.com/toggle-flow/js-sdk) | `npm install @toggleflow/js-sdk` |
+| Python | [toggle-flow/python-sdk](https://github.com/toggle-flow/python-sdk) | `pip install toggleflow` |
+| Go | [toggle-flow/go-sdk](https://github.com/toggle-flow/go-sdk) | `go get github.com/toggle-flow/go-sdk` |
+
+---
+
 ## Roadmap
 
-- [ ] JavaScript / TypeScript SDK
-- [ ] Python SDK
-- [ ] Go SDK
 - [ ] Webhooks — notify external services on flag changes
 - [ ] Scheduled flag changes — enable / disable at a set time
 - [ ] Postgres driver — for high-write or multi-replica deployments
