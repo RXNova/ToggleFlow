@@ -7,7 +7,7 @@ COPY frontend/ .
 RUN pnpm build
 
 # Stage 2 — build Go binary with embedded frontend
-FROM golang:1.23-alpine AS backend
+FROM golang:1.25-alpine AS backend
 WORKDIR /app
 COPY backend/go.mod backend/go.sum ./
 RUN go mod download
