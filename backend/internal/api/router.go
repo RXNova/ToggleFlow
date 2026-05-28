@@ -12,6 +12,8 @@ import (
 func Register(app *fiber.App, database *bun.DB, broker *stream.Broker) {
 	h := newHandler(database, broker)
 
+	app.Get("/health", h.Health)
+
 	// Public — no auth required
 	app.Get("/api/setup/status", h.SetupStatus)
 	app.Post("/api/setup", h.Setup)
