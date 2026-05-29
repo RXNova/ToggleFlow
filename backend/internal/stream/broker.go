@@ -59,3 +59,17 @@ func (b *Broker) Publish(e Event) {
 		}
 	}
 }
+
+// PublishAll broadcasts an event to every connected subscriber across all projects.
+func (b *Broker) PublishAll(e Event) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+	for _, subs := range b.subs {
+		for ch := range subs {
+			select {
+			case ch <- e:
+			default:
+			}
+		}
+	}
+}

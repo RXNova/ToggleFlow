@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"toggleflow/internal/api"
 	"toggleflow/internal/db"
@@ -25,6 +26,12 @@ func main() {
 		log.Fatalf("failed to run migrations: %v", err)
 	}
 
+	if os.Getenv("SEED_DEMO") == "true" {
+		if err := db.Seed(database); err != nil {
+			log.Fatalf("failed to seed demo data: %v", err)
+		}
+	}
+
 	app := fiber.New(fiber.Config{
 		AppName: "ToggleFlow",
 	})
@@ -33,6 +40,25 @@ func main() {
 	app.Use(cors.New())
 
 	broker := stream.New()
+
+	if os.Getenv("SEED_DEMO") == "true" {
+		go func() {
+			ticker := time.NewTicker(30 * time.Minute)
+			defer ticker.Stop()
+			for range ticker.C {
+				if err := db.Reset(database); err != nil {
+					log.Printf("demo reset failed: %v", err)
+					continue
+				}
+				if err := db.Seed(database); err != nil {
+					log.Printf("demo re-seed failed: %v", err)
+					continue
+				}
+				broker.PublishAll(stream.Event{Action: "demo.reset"})
+				log.Println("demo database reset and re-seeded")
+			}
+		}()
+	}
 
 	// API routes — like registering a NestJS module
 	api.Register(app, database, broker)

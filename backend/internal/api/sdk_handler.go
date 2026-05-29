@@ -287,12 +287,17 @@ func (h *handler) SDKStream(c *fiber.Ctx) error {
 				if !ok {
 					return
 				}
-				payload, _ := json.Marshal(map[string]any{
-					"type":    "flag." + event.Action,
-					"flag":    event.FlagKey,
-					"env":     event.EnvKey,
-					"project": event.ProjectID,
-				})
+				var payload []byte
+				if event.Action == "demo.reset" {
+					payload, _ = json.Marshal(map[string]any{"type": "demo.reset"})
+				} else {
+					payload, _ = json.Marshal(map[string]any{
+						"type":    "flag." + event.Action,
+						"flag":    event.FlagKey,
+						"env":     event.EnvKey,
+						"project": event.ProjectID,
+					})
+				}
 				_, _ = fmt.Fprintf(w, "data: %s\n\n", payload)
 				_ = w.Flush()
 			}

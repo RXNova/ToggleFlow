@@ -80,6 +80,25 @@
             <Loader2 v-if="loading" class="size-4 animate-spin" />
             {{ loading ? $t('login.submitting') : $t('login.submit') }}
           </Button>
+
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <span class="w-full border-t" />
+            </div>
+            <div class="relative flex justify-center text-xs uppercase">
+              <span class="bg-background px-2 text-muted-foreground">or</span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            class="w-full"
+            :disabled="loading"
+            @click="enterDemo"
+          >
+            Enter Demo
+          </Button>
         </form>
 
         <div class="flex justify-center">
@@ -117,6 +136,12 @@ const features = computed(() => [
   { icon: Zap, label: t('brand.features.realtime') },
   { icon: Shield, label: t('brand.features.rbac') },
 ])
+
+function enterDemo() {
+  form.value.email = 'demo@toggleflow.io'
+  form.value.password = 'flag-demo-flow'
+  submit()
+}
 
 async function submit() {
   error.value = ''
